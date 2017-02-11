@@ -12,12 +12,13 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml;
+//ini 사용을 위한 include지만 안 쓰므로 주석처리
 //using System.Runtime.InteropServices;
 
 namespace LR2Helper_GV {
     public partial class mainForm : Form {
         public static string prog_version = "L2.0.0a";
-        public static string prog_build = "170211 alpha";
+        public static string prog_build = "170211:1 alpha";
 
         public IntPtr prog_baseaddr; // 보통 0x400000;
         public IntPtr vmem_getbaseaddr_asm; // base address를 빼올 코드 
@@ -116,7 +117,7 @@ namespace LR2Helper_GV {
             comboBoxDSTYtemplate.ValueMember = "Value";
             comboBoxDSTYtemplate.DataSource = new BindingSource(skin_template, null);
 
-            this.Text = "LR2Helper" + prog_version + " [" + prog_build + "]";
+            this.Text = "LR2Helper" + prog_version + " [build:" + prog_build + "]";
             buttonUnsupportskinmode.Enabled = true;
             /* ini로 설정 저장. 사용하지 않음
             int getini_status = GetPrivateProfileString("setting", "DSTY", "",temp,255, setting_path);
@@ -188,7 +189,7 @@ namespace LR2Helper_GV {
                         } else {
                             for (uint i = 0; i < 5; i++) {
                                 //attach 실패한 경우 (isRunning = false)
-                                toolStripStatusLabel1.Text = "Failed attach to LR2. Try to reattach in " + (5 - i) + "s";
+                                toolStripStatusLabel1.Text = "LR2body is running but is not responding. Try to reattach in " + (5 - i) + "s";
                                 Thread.Sleep(1000);
                             }
                         }
@@ -234,7 +235,7 @@ namespace LR2Helper_GV {
                     if (!sharp.IsRunning) //LR2 프로세스 체크
                     {
                         Thread th_initFirstprocess = new Thread(new ThreadStart(initFirstprocess));
-                        toolStripStatusLabel1.Text = "LR2 process is terminated";
+                        toolStripStatusLabel1.Text = "LR2 process is terminated!";
                         Thread.Sleep(2000);
                         th_initFirstprocess.Start();
                         break;
@@ -339,7 +340,7 @@ namespace LR2Helper_GV {
                         if (!sharp.IsRunning) //LR2 프로세스 체크
                         {
                             Thread th_initFirstprocess = new Thread(new ThreadStart(initFirstprocess));
-                            toolStripStatusLabel1.Text = "LR2 process is terminated";
+                            toolStripStatusLabel1.Text = "LR2 process is terminated!";
                             Thread.Sleep(2000);
                             th_initFirstprocess.Start();
 
