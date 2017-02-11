@@ -18,7 +18,7 @@ using System.Xml;
 namespace LR2Helper_GV {
     public partial class mainForm : Form {
         public static string prog_version = "L2.0.0a";
-        public static string prog_build = "170211:1 alpha";
+        public static string prog_build = "170211:2 release";
 
         public IntPtr prog_baseaddr; // 보통 0x400000;
         public IntPtr vmem_getbaseaddr_asm; // base address를 빼올 코드 
@@ -331,7 +331,7 @@ namespace LR2Helper_GV {
 
                         toolStripStatusLabel1.Text = "Green Number: " + Convert.ToInt32(green_number).ToString();
 
-                        //unsupported mode가 on이면 fps에 녹숫을 덮어씌운다
+                        //unsupported skin mode가 on이면 fps에 녹숫을 덮어씌운다
                         sharp.Write<int>(vmem_dstnumber_302_reg + 0x8, Convert.ToInt32(green_number), false);
                         if (flag_unsupportedskinmode == 1) {
                             sharp.Write<double>((IntPtr)(LR2value.baseaddr + 0x20E08), Convert.ToInt32(green_number), false);
