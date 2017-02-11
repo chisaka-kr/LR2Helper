@@ -18,7 +18,7 @@ using System.Xml;
 namespace LR2Helper_GV {
     public partial class mainForm : Form {
         public static string prog_version = "L2.0.0a";
-        public static string prog_build = "170211:4 release";
+        public static string prog_build = "170211:5 release";
 
         public IntPtr prog_baseaddr; // 보통 0x400000;
         public IntPtr vmem_getbaseaddr_asm; // base address를 빼올 코드 
@@ -139,10 +139,24 @@ namespace LR2Helper_GV {
                     setting_update.Load(@setting_path);
                     setting_update.GetElementsByTagName("DST_Y")[0].InnerText = textBoxDSTY.Text;
                     setting_update.Save(@setting_path);
-
-                    var process_id = Process.GetProcessesByName("LRHbody_FS9.1"); // process id 체크
-                                                                                  //var process_id = ApplicationFinder.FromProcessName("LRHbody_FS9.1").First();
-                    if (process_id.Length > 0) //process id가 0이 아닐 시
+                    var process_id = Process.GetProcessesByName("LR2body");
+                    String[] process_name = {
+                          "LRHbody",
+                          "LR2body_FS10",
+                          "LRHbody_FS10",
+                          "LR2body_FS9.1",
+                          "LRHbody_FS9.1"                          
+                    };
+                    if (process_id.Length == 0) {
+                        for (var i = 0; i < process_name.Length; i++) {
+                            process_id = Process.GetProcessesByName(process_name[i]);
+                            if(process_id.Length>0) {
+                                break;
+                            }
+                        }
+                    }
+                        //var process_id = ApplicationFinder.FromProcessName("LRHbody_FS9.1").First();
+                        if (process_id.Length > 0) //process id가 0이 아닐 시
                     {
                         //IntPtr address = new IntPtr(0x400000);
                         //IntPtr address2 = new IntPtr(0x400010);
