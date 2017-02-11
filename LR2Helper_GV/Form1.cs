@@ -207,6 +207,7 @@ namespace LR2Helper_GV
                         else
                         {
                             for (uint i = 0; i < 5; i++) {
+                                //attach 실패한 경우 (isRunning = false)
                                 toolStripStatusLabel1.Text = "Failed attach to LR2. Try to reattach in " + (5 - i) + "s";
                                 Thread.Sleep(1000);
                             }
@@ -217,6 +218,7 @@ namespace LR2Helper_GV
                     {
                         for (uint i = 0; i < 5; i++)
                         {
+                            //LR2body를 찾지 못한 경우 (process_id = null)
                             toolStripStatusLabel1.Text = "Can't found LR2body process. Try to reattach in " + (5 - i) + "s";
                             Thread.Sleep(1000);
                         }
@@ -277,7 +279,7 @@ namespace LR2Helper_GV
         }
         public void getGreenvalue()
         {
-
+            //녹숫자를 출력한다. 쓰레드로 동작
             var cal_bpm = 0;
             var dst_y = 0;
             double green_number = 0;
@@ -327,17 +329,16 @@ namespace LR2Helper_GV
                 if (LR2value.baseaddr > 0)
                 {
                     try {
-                        //변수갱신
-
+                        //계산에 필요한 변수 긁어오기
                         LR2value.bpm = sharp.Read<double>((IntPtr)(LR2value.baseaddr + 0x97950), false);
                         LR2value.lanecover = sharp.Read<int>((IntPtr)(LR2value.baseaddr + 0x20), false);
                         LR2value.hispeed = sharp.Read<int>((IntPtr)LR2value.baseaddr, false);
                         LR2value.hispeed_option = sharp.Read<int>((IntPtr)(LR2value.baseaddr + 0x48), false);
                         LR2value.bpm_power = sharp.Read<double>((IntPtr)(LR2value.baseaddr + 0x9FCE0), false);
                         LR2value.scrollspeed = sharp.Read<int>((IntPtr)(LR2value.baseaddr + 0x98), false);
+                        
 
-
-
+                        //하이스피드 고정 옵션이 있다면 보정한다
                         if ((LR2value.hispeed_option > 0) && (LR2value.hispeed_option < 4))
                         {
                             cal_bpm = Convert.ToInt32(LR2value.bpm_power * (int)LR2value.bpm);
@@ -370,9 +371,11 @@ namespace LR2Helper_GV
                             cal_bpm = 150;
                         }
                         green_number = 10 * ((2173.0 / 725.0) * 1000) * (dst_y) / (LR2value.hispeed * LR2value.scrollspeed) * (150.0 / cal_bpm) * (1.0 - (LR2value.lanecover / 100.0));
-                        //10*((2173/725)*1000)*(DST_Y)/(HISPD*SCRSPD)*(150/BPM)*(1-(LANECOVER/100))
+                        //게산식 : 10*((2173/725)*1000)*(DST_Y)/(HISPD*SCRSPD)*(150/BPM)*(1-(LANECOVER/100))
 
                         toolStripStatusLabel1.Text = "Green Number: " + Convert.ToInt32(green_number).ToString();
+
+                        //unsupported mode가 on이면 fps에 녹숫을 덮어씌운다
                         sharp.Write<int>(vmem_dstnumber_302_reg + 0x8, Convert.ToInt32(green_number), false);
                         if (flag_unsupportedskinmode == 1)
                         {
@@ -425,14 +428,14 @@ namespace LR2Helper_GV
                 }
             } catch(Exception)
             {
-                toolStripStatusLabel1.Text = "Key not found!!";
+                toolStripStatusLabel1.Text = "Key not found!!"; //사용자가 임의로 텍스트를 입력하였을 때 발생
             }
 
         }
 
         private void buttonUnsupportskinmode_Click(object sender, EventArgs e)
         {
-            if (LR2value.baseaddr>0)
+            if (LR2value.baseaddr>0) // 성공적으로 LR2가 로드되었을 때만 작동하도록
             {
                 buttonUnsupportskinmode.Enabled = false;
                 buttonUnsupportskinmode.Text = "Enabled. check LR2 FPS value (toggle F7)";
@@ -446,7 +449,7 @@ namespace LR2Helper_GV
                                 "nop",
                                 "nop"
                     },
-                    prog_baseaddr + 0xb6ab7);
+                    prog_baseaddr + 0xb6ab7); // FPS 숫자 갱신을 무효화
                 flag_unsupportedskinmode = 1;
             }
         }
