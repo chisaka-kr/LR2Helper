@@ -14,12 +14,10 @@ using System.Windows.Forms;
 using System.Xml;
 //using System.Runtime.InteropServices;
 
-namespace LR2Helper_GV
-{
-    public partial class mainForm : Form
-    {
+namespace LR2Helper_GV {
+    public partial class mainForm : Form {
         public static string prog_version = "L2.0.0a";
-        public static string prog_build = "170210 alpha";
+        public static string prog_build = "170211 alpha";
 
         public IntPtr prog_baseaddr; // 보통 0x400000;
         public IntPtr vmem_getbaseaddr_asm; // base address를 빼올 코드 
@@ -43,26 +41,21 @@ namespace LR2Helper_GV
         private string setting_path = Application.StartupPath + "\\lr2helper-setting.xml";
         static Dictionary<String, String> skin_template = new Dictionary<String, String>();
 
-    public mainForm()
-        {
+        public mainForm() {
             InitializeComponent();
             Thread th_initFirstprocess = new Thread(new ThreadStart(initFirstprocess));
             th_initFirstprocess.Start();
             StringBuilder temp = new StringBuilder(255);
             //form setting (설정값 등)
-            try
-            {
+            try {
                 XmlDocument setting_file = new XmlDocument();
                 setting_file.Load(@setting_path);
-            }
-            catch (Exception)
-            {
+            } catch (Exception) {
                 toolStripStatusLabel1.Text = "Failed load setting file. Try to create it.";
                 XmlWriterSettings setting_make_settings = new XmlWriterSettings();
                 setting_make_settings.Indent = true;
                 setting_make_settings.IndentChars = "\t";
-                using (XmlWriter setting_make = XmlWriter.Create(@setting_path, setting_make_settings))
-                {
+                using (XmlWriter setting_make = XmlWriter.Create(@setting_path, setting_make_settings)) {
                     setting_make.WriteStartDocument();
                     setting_make.WriteStartElement("lr2helper");
                     setting_make.WriteStartElement("Setting");
@@ -97,28 +90,20 @@ namespace LR2Helper_GV
                     setting_make.Flush();
                     setting_make.Close();
                 }
-            }
-            finally
-            {
+            } finally {
                 skin_template["default"] = textBoxDSTY.Text;
-                using (XmlReader setting_root = XmlReader.Create(@setting_path))
-                {
-                    while (setting_root.Read())
-                    {
-                        if (setting_root.IsStartElement())
-                        {
-                            switch (setting_root.Name)
-                            {
+                using (XmlReader setting_root = XmlReader.Create(@setting_path)) {
+                    while (setting_root.Read()) {
+                        if (setting_root.IsStartElement()) {
+                            switch (setting_root.Name) {
                                 case "DST_Y":
-                                    if(setting_root.Read())
-                                    {
+                                    if (setting_root.Read()) {
                                         textBoxDSTY.Text = setting_root.Value.Trim();
                                     }
                                     break;
                                 case "skin":
                                     String skin_value = setting_root["value"];
-                                    if (setting_root.Read())
-                                    {
+                                    if (setting_root.Read()) {
                                         skin_template[setting_root.Value.Trim()] = skin_value;
                                     }
                                     break;
@@ -131,7 +116,7 @@ namespace LR2Helper_GV
             comboBoxDSTYtemplate.ValueMember = "Value";
             comboBoxDSTYtemplate.DataSource = new BindingSource(skin_template, null);
 
-            this.Text = "LR2Helper"+prog_version+" ["+prog_build+"]";
+            this.Text = "LR2Helper" + prog_version + " [" + prog_build + "]";
             buttonUnsupportskinmode.Enabled = true;
             /* ini로 설정 저장. 사용하지 않음
             int getini_status = GetPrivateProfileString("setting", "DSTY", "",temp,255, setting_path);
@@ -143,10 +128,8 @@ namespace LR2Helper_GV
 
 
         }
-        void initFirstprocess()
-        {
-            while (true)
-            {
+        void initFirstprocess() {
+            while (true) {
                 try {
                     //ini로 설정 저장. 사용하지 않음
                     //WritePrivateProfileString("setting", "DSTY", textBoxDSTY.Text.ToString(), iniPath);
@@ -164,8 +147,7 @@ namespace LR2Helper_GV
                         //IntPtr address2 = new IntPtr(0x400010);
                         //var sharp = new MemorySharp(); //MemorySharp로 process hook
                         sharp = new MemorySharp(process_id[0]);
-                        if (sharp.IsRunning == true)
-                        {
+                        if (sharp.IsRunning == true) {
                             toolStripStatusLabel1.Text = "LR2 detected.";
 
                             prog_baseaddr = new IntPtr(sharp.Modules.RemoteModules.First().BaseAddress.ToInt32());
@@ -203,9 +185,7 @@ namespace LR2Helper_GV
                             Thread th_getGreenvalue = new Thread(new ThreadStart(getGreenvalue));
                             th_getGreenvalue.Start();
                             break;
-                        }
-                        else
-                        {
+                        } else {
                             for (uint i = 0; i < 5; i++) {
                                 //attach 실패한 경우 (isRunning = false)
                                 toolStripStatusLabel1.Text = "Failed attach to LR2. Try to reattach in " + (5 - i) + "s";
@@ -213,48 +193,38 @@ namespace LR2Helper_GV
                             }
                         }
 
-                    }
-                    else
-                    {
-                        for (uint i = 0; i < 5; i++)
-                        {
+                    } else {
+                        for (uint i = 0; i < 5; i++) {
                             //LR2body를 찾지 못한 경우 (process_id = null)
-                            toolStripStatusLabel1.Text = "Can't found LR2body process. Try to reattach in " + (5 - i) + "s";
+                            toolStripStatusLabel1.Text = "Can't find LR2body process. Try to reattach in " + (5 - i) + "s";
                             Thread.Sleep(1000);
                         }
                     }
 
-                    if (flag_interrupt == 1)
-                    {
+                    if (flag_interrupt == 1) {
                         break;
                     }
-                }
-                catch (Exception)
-                {
+                } catch (Exception) {
                     toolStripStatusLabel1.Text = "Unexpected error";
                 }
             }
-            
+
         }
 
-        public void getBaseaddr()
-        {
+        public void getBaseaddr() {
             Thread.Sleep(1500);
-            
+
             toolStripStatusLabel1.Text = "waiting for load music select screen.";
-            
-            while (true)
-            {
+
+            while (true) {
                 try {
                     //ini로 설정 저장. 사용하지 않음
                     //WritePrivateProfileString("setting", "DSTY", textBoxDSTY.Text.ToString(), setting_path); 
 
-
                     int baseaddr = sharp.Read<int>(vmem_getbaseaddr_reg, false);
                     if (toolStripStatusLabel1.Text.Length > 50) { toolStripStatusLabel1.Text = "waiting for load music select screen."; }
                     toolStripStatusLabel1.Text += ".";
-                    if (baseaddr > 0)
-                    {
+                    if (baseaddr > 0) {
                         LR2value.baseaddr = baseaddr;
 
                         toolStripStatusLabel1.Text = "LR2 attach complete.";
@@ -269,16 +239,14 @@ namespace LR2Helper_GV
                         th_initFirstprocess.Start();
                         break;
                     }
-                    if(flag_interrupt == 1)
-                    {
+                    if (flag_interrupt == 1) {
                         break;
                     }
                     Thread.Sleep(1000);
                 } catch (Exception e) { }
-            } 
+            }
         }
-        public void getGreenvalue()
-        {
+        public void getGreenvalue() {
             //녹숫자를 출력한다. 쓰레드로 동작
             var cal_bpm = 0;
             var dst_y = 0;
@@ -324,10 +292,8 @@ namespace LR2Helper_GV
             sharp.Assembly.Inject(str_vmem_dstnumber_302_jmp, prog_baseaddr + 0x24d0); // injection
 
 
-            while (true)
-            {
-                if (LR2value.baseaddr > 0)
-                {
+            while (true) {
+                if (LR2value.baseaddr > 0) {
                     try {
                         //계산에 필요한 변수 긁어오기
                         LR2value.bpm = sharp.Read<double>((IntPtr)(LR2value.baseaddr + 0x97950), false);
@@ -336,38 +302,27 @@ namespace LR2Helper_GV
                         LR2value.hispeed_option = sharp.Read<int>((IntPtr)(LR2value.baseaddr + 0x48), false);
                         LR2value.bpm_power = sharp.Read<double>((IntPtr)(LR2value.baseaddr + 0x9FCE0), false);
                         LR2value.scrollspeed = sharp.Read<int>((IntPtr)(LR2value.baseaddr + 0x98), false);
-                        
+
 
                         //하이스피드 고정 옵션이 있다면 보정한다
-                        if ((LR2value.hispeed_option > 0) && (LR2value.hispeed_option < 4))
-                        {
+                        if ((LR2value.hispeed_option > 0) && (LR2value.hispeed_option < 4)) {
                             cal_bpm = Convert.ToInt32(LR2value.bpm_power * (int)LR2value.bpm);
-                        }
-                        else if (LR2value.hispeed_option == 4)
-                        {
+                        } else if (LR2value.hispeed_option == 4) {
                             cal_bpm = 150;
-                        }
-                        else
-                        {
+                        } else {
                             cal_bpm = (int)LR2value.bpm;
                         }
 
-                        if (textBoxDSTY.Text != null)
-                        {
+                        if (textBoxDSTY.Text != null) {
                             try {
-                                if (dst_y != Int32.Parse(textBoxDSTY.Text))
-                                {
+                                if (dst_y != Int32.Parse(textBoxDSTY.Text)) {
                                     dst_y = Int32.Parse(textBoxDSTY.Text);
                                 }
-                            }
-                            catch (Exception) { }
-                        }
-                        else
-                        {
+                            } catch (Exception) { }
+                        } else {
                             dst_y = 482;
                         }
-                        if (cal_bpm == 0)
-                        {
+                        if (cal_bpm == 0) {
                             cal_bpm = 150;
                         }
                         green_number = 10 * ((2173.0 / 725.0) * 1000) * (dst_y) / (LR2value.hispeed * LR2value.scrollspeed) * (150.0 / cal_bpm) * (1.0 - (LR2value.lanecover / 100.0));
@@ -377,11 +332,10 @@ namespace LR2Helper_GV
 
                         //unsupported mode가 on이면 fps에 녹숫을 덮어씌운다
                         sharp.Write<int>(vmem_dstnumber_302_reg + 0x8, Convert.ToInt32(green_number), false);
-                        if (flag_unsupportedskinmode == 1)
-                        {
+                        if (flag_unsupportedskinmode == 1) {
                             sharp.Write<double>((IntPtr)(LR2value.baseaddr + 0x20E08), Convert.ToInt32(green_number), false);
                         }
-                        
+
                         if (!sharp.IsRunning) //LR2 프로세스 체크
                         {
                             Thread th_initFirstprocess = new Thread(new ThreadStart(initFirstprocess));
@@ -391,51 +345,42 @@ namespace LR2Helper_GV
 
                             break;
                         }
-                        if (flag_interrupt == 1)
-                        {
+                        if (flag_interrupt == 1) {
                             break;
                         }
                         Thread.Sleep(16);
-                    } catch(Exception)
-                    {
+                    } catch (Exception) {
                         toolStripStatusLabel1.Text = "Critical error occured. Please restart LR2Helper.";
                     }
                 }
             }
         }
 
-        private void mainForm_Load(object sender, EventArgs e)
-        {
+        private void mainForm_Load(object sender, EventArgs e) {
 
         }
 
-        private void mainForm_FormClosing(object sender, FormClosingEventArgs e)
-        {
+        private void mainForm_FormClosing(object sender, FormClosingEventArgs e) {
             flag_interrupt = 1;
         }
 
-        private void labelDSTYtemplate_Click(object sender, EventArgs e)
-        {
+        private void labelDSTYtemplate_Click(object sender, EventArgs e) {
 
         }
 
-        private void comboBoxDSTYtemplate_TextChanged(object sender, EventArgs e)
-        {
+        private void comboBoxDSTYtemplate_TextChanged(object sender, EventArgs e) {
             try {
-                if (comboBoxDSTYtemplate.Text != "default")
-                {
+                if (comboBoxDSTYtemplate.Text != "default") {
                     textBoxDSTY.Text = skin_template[comboBoxDSTYtemplate.Text];
                 }
-            } catch(Exception)
-            {
+            } catch (Exception) {
                 toolStripStatusLabel1.Text = "Key not found!!"; //사용자가 임의로 텍스트를 입력하였을 때 발생
             }
 
         }
 
-        private void buttonUnsupportskinmode_Click(object sender, EventArgs e)
-        {
-            if (LR2value.baseaddr>0) // 성공적으로 LR2가 로드되었을 때만 작동하도록
+        private void buttonUnsupportskinmode_Click(object sender, EventArgs e) {
+            if (LR2value.baseaddr > 0) // 성공적으로 LR2가 로드되었을 때만 작동하도록
             {
                 buttonUnsupportskinmode.Enabled = false;
                 buttonUnsupportskinmode.Text = "Enabled. check LR2 FPS value (toggle F7)";
@@ -454,8 +399,7 @@ namespace LR2Helper_GV
             }
         }
     }
-    public class LR2value
-    {
+    public class LR2value {
         public int baseaddr = 0;
         public int hispeed = 0;
         public int lanecover = 0;
@@ -463,7 +407,7 @@ namespace LR2Helper_GV
         public double bpm_power = 1;
         public double bpm = 0;
         public int scrollspeed = 100;
-        
+
     }
 }
 
