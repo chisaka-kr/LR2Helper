@@ -18,7 +18,7 @@ using System.Xml;
 namespace LR2Helper_GV {
     public partial class mainForm : Form {
         public static string prog_version = "L2.0.0a";
-        public static string prog_build = "170211:3 alpha";
+        public static string prog_build = "170211:4 alpha";
 
         public IntPtr prog_baseaddr; // 보통 0x400000;
         public IntPtr vmem_getbaseaddr_asm; // base address를 빼올 코드 
@@ -244,7 +244,7 @@ namespace LR2Helper_GV {
                         break;
                     }
                     Thread.Sleep(1000);
-                } catch (Exception e) { }
+                } catch (Exception) { }
             }
         }
         public void getGreenvalue() {
@@ -294,8 +294,8 @@ namespace LR2Helper_GV {
 
 
             while (true) {
-                if (LR2value.baseaddr > 0) {
-                    try {
+                try {
+                    if (LR2value.baseaddr > 0) {
                         //계산에 필요한 변수 긁어오기
                         LR2value.bpm = sharp.Read<double>((IntPtr)(LR2value.baseaddr + 0x97950), false);
                         LR2value.lanecover = sharp.Read<int>((IntPtr)(LR2value.baseaddr + 0x20), false);
@@ -343,17 +343,15 @@ namespace LR2Helper_GV {
                             toolStripStatusLabel1.Text = "LR2 process is terminated!";
                             Thread.Sleep(2000);
                             th_initFirstprocess.Start();
-
-                            break;
                         }
-                        if (flag_interrupt == 1) {
-                            break;
-                        }
-                        Thread.Sleep(16);
-                    } catch (Exception) {
-                        toolStripStatusLabel1.Text = "Critical error occured. Please restart LR2Helper.";
                     }
+                } catch (Exception) {
+                    toolStripStatusLabel1.Text = "Critical error occured. Please restart LR2Helper.";
                 }
+                if (flag_interrupt == 1) {
+                    break;
+                }
+                Thread.Sleep(16);
             }
         }
 
