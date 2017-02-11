@@ -18,7 +18,7 @@ using System.Xml;
 namespace LR2Helper_GV {
     public partial class mainForm : Form {
         public static string prog_version = "L2.0.0a";
-        public static string prog_build = "170211:4 alpha";
+        public static string prog_build = "170211:4 release";
 
         public IntPtr prog_baseaddr; // 보통 0x400000;
         public IntPtr vmem_getbaseaddr_asm; // base address를 빼올 코드 
