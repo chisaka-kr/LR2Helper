@@ -32,9 +32,11 @@
             this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
             this.textBoxDSTY = new System.Windows.Forms.TextBox();
             this.labelDSTY = new System.Windows.Forms.Label();
-            this.comboBoxDSTYtemplate = new System.Windows.Forms.ComboBox();
+            this.comboBoxDSTtemplate = new System.Windows.Forms.ComboBox();
             this.labelDSTYtemplate = new System.Windows.Forms.Label();
             this.buttonUnsupportskinmode = new System.Windows.Forms.Button();
+            this.textBoxDSTX = new System.Windows.Forms.TextBox();
+            this.labelDSTX = new System.Windows.Forms.Label();
             this.statusStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -58,9 +60,9 @@
             // textBoxDSTY
             // 
             this.textBoxDSTY.Font = new System.Drawing.Font("MS UI Gothic", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.textBoxDSTY.Location = new System.Drawing.Point(140, 36);
+            this.textBoxDSTY.Location = new System.Drawing.Point(185, 36);
             this.textBoxDSTY.Name = "textBoxDSTY";
-            this.textBoxDSTY.Size = new System.Drawing.Size(100, 22);
+            this.textBoxDSTY.Size = new System.Drawing.Size(55, 22);
             this.textBoxDSTY.TabIndex = 2;
             this.textBoxDSTY.Text = "321";
             // 
@@ -68,23 +70,23 @@
             // 
             this.labelDSTY.AutoSize = true;
             this.labelDSTY.Font = new System.Drawing.Font("MS UI Gothic", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.labelDSTY.Location = new System.Drawing.Point(9, 42);
+            this.labelDSTY.Location = new System.Drawing.Point(135, 42);
             this.labelDSTY.Name = "labelDSTY";
-            this.labelDSTY.Size = new System.Drawing.Size(125, 12);
+            this.labelDSTY.Size = new System.Drawing.Size(38, 12);
             this.labelDSTY.TabIndex = 3;
-            this.labelDSTY.Text = "DST_Y (manual setting)";
+            this.labelDSTY.Text = "DST_Y";
             // 
-            // comboBoxDSTYtemplate
+            // comboBoxDSTtemplate
             // 
-            this.comboBoxDSTYtemplate.Font = new System.Drawing.Font("MS UI Gothic", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
-            this.comboBoxDSTYtemplate.FormattingEnabled = true;
-            this.comboBoxDSTYtemplate.ImeMode = System.Windows.Forms.ImeMode.Off;
-            this.comboBoxDSTYtemplate.Location = new System.Drawing.Point(79, 12);
-            this.comboBoxDSTYtemplate.Name = "comboBoxDSTYtemplate";
-            this.comboBoxDSTYtemplate.Size = new System.Drawing.Size(161, 20);
-            this.comboBoxDSTYtemplate.TabIndex = 4;
-            this.comboBoxDSTYtemplate.Text = "Select skin..";
-            this.comboBoxDSTYtemplate.TextChanged += new System.EventHandler(this.comboBoxDSTYtemplate_TextChanged);
+            this.comboBoxDSTtemplate.Font = new System.Drawing.Font("MS UI Gothic", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
+            this.comboBoxDSTtemplate.FormattingEnabled = true;
+            this.comboBoxDSTtemplate.ImeMode = System.Windows.Forms.ImeMode.Off;
+            this.comboBoxDSTtemplate.Location = new System.Drawing.Point(79, 12);
+            this.comboBoxDSTtemplate.Name = "comboBoxDSTtemplate";
+            this.comboBoxDSTtemplate.Size = new System.Drawing.Size(161, 20);
+            this.comboBoxDSTtemplate.TabIndex = 4;
+            this.comboBoxDSTtemplate.Text = "Select skin..";
+            this.comboBoxDSTtemplate.TextChanged += new System.EventHandler(this.comboBoxDSTtemplate_TextChanged);
             // 
             // labelDSTYtemplate
             // 
@@ -107,15 +109,36 @@
             this.buttonUnsupportskinmode.UseVisualStyleBackColor = true;
             this.buttonUnsupportskinmode.Click += new System.EventHandler(this.buttonUnsupportskinmode_Click);
             // 
+            // textBoxDSTX
+            // 
+            this.textBoxDSTX.Font = new System.Drawing.Font("MS UI Gothic", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
+            this.textBoxDSTX.Location = new System.Drawing.Point(66, 36);
+            this.textBoxDSTX.Name = "textBoxDSTX";
+            this.textBoxDSTX.Size = new System.Drawing.Size(55, 22);
+            this.textBoxDSTX.TabIndex = 7;
+            this.textBoxDSTX.Text = "321";
+            // 
+            // labelDSTX
+            // 
+            this.labelDSTX.AutoSize = true;
+            this.labelDSTX.Font = new System.Drawing.Font("MS UI Gothic", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.labelDSTX.Location = new System.Drawing.Point(16, 42);
+            this.labelDSTX.Name = "labelDSTX";
+            this.labelDSTX.Size = new System.Drawing.Size(38, 12);
+            this.labelDSTX.TabIndex = 3;
+            this.labelDSTX.Text = "DST_X";
+            // 
             // mainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.Control;
             this.ClientSize = new System.Drawing.Size(393, 94);
+            this.Controls.Add(this.textBoxDSTX);
             this.Controls.Add(this.buttonUnsupportskinmode);
             this.Controls.Add(this.labelDSTYtemplate);
-            this.Controls.Add(this.comboBoxDSTYtemplate);
+            this.Controls.Add(this.comboBoxDSTtemplate);
+            this.Controls.Add(this.labelDSTX);
             this.Controls.Add(this.labelDSTY);
             this.Controls.Add(this.textBoxDSTY);
             this.Controls.Add(this.statusStrip1);
@@ -138,8 +161,10 @@
         private System.Windows.Forms.TextBox textBoxDSTY;
         private System.Windows.Forms.Label labelDSTY;
         private System.Windows.Forms.Label labelDSTYtemplate;
-        public System.Windows.Forms.ComboBox comboBoxDSTYtemplate;
+        public System.Windows.Forms.ComboBox comboBoxDSTtemplate;
         private System.Windows.Forms.Button buttonUnsupportskinmode;
+        private System.Windows.Forms.TextBox textBoxDSTX;
+        private System.Windows.Forms.Label labelDSTX;
     }
 }
 
