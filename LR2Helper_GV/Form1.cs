@@ -18,7 +18,7 @@ using System.Xml;
 namespace LR2Helper_GV {
     public partial class mainForm : Form {
         static string prog_version = "L2.0.1";
-        static string prog_build = "170212:1 release";
+        static string prog_build = "170212:2 release";
 
         IntPtr prog_baseaddr; // 보통 0x400000;
         IntPtr vmem_getbaseaddr_asm; // base address를 빼올 코드 
@@ -360,12 +360,22 @@ namespace LR2Helper_GV {
                         LR2value.bpm_power = sharp.Read<double>((IntPtr)(LR2value.baseaddr + 0x9FCE0), false);
                         LR2value.scrollspeed = sharp.Read<int>((IntPtr)(LR2value.baseaddr + 0x98), false);
                         //여기까지 녹숫 계산을 위한 변수들
-                        LR2value.window_width = sharp.Read<int>((IntPtr)(LR2value.baseaddr - 0x61700 - 0x60), false);
-                        LR2value.window_height = sharp.Read<int>((IntPtr)(LR2value.baseaddr - 0x616fc - 0x60), false);
-                        LR2value.resolution_width = sharp.Read<int>((IntPtr)(LR2value.baseaddr - 0x616f0 - 0x60), false);
-                        LR2value.resolution_height = sharp.Read<int>((IntPtr)(LR2value.baseaddr - 0x616ec - 0x60), false);
-                        LR2value.fullscreen_width = sharp.Read<int>((IntPtr)(LR2value.baseaddr - 0x60890 - 0x60), false);
-                        LR2value.fullscreen_height = sharp.Read<int>((IntPtr)(LR2value.baseaddr - 0x6088c - 0x60), false);
+
+                        LR2value.window_width = sharp.Read<int>((IntPtr)(LR2value.baseaddr - 0x61700), false);
+                        LR2value.window_height = sharp.Read<int>((IntPtr)(LR2value.baseaddr - 0x616f), false);
+                        LR2value.resolution_width = sharp.Read<int>((IntPtr)(LR2value.baseaddr - 0x616f0), false);
+                        LR2value.resolution_height = sharp.Read<int>((IntPtr)(LR2value.baseaddr - 0x616ec), false);
+                        LR2value.fullscreen_width = sharp.Read<int>((IntPtr)(LR2value.baseaddr - 0x60890), false);
+                        LR2value.fullscreen_height = sharp.Read<int>((IntPtr)(LR2value.baseaddr - 0x6088c), false);
+                        //보험용
+                        if ((LR2value.window_width == 0) || (LR2value.window_height == 0)) {
+                            LR2value.window_width = sharp.Read<int>((IntPtr)(LR2value.baseaddr - 0x61700 - 0x60), false);
+                            LR2value.window_height = sharp.Read<int>((IntPtr)(LR2value.baseaddr - 0x616fc - 0x60), false);
+                            LR2value.resolution_width = sharp.Read<int>((IntPtr)(LR2value.baseaddr - 0x616f0 - 0x60), false);
+                            LR2value.resolution_height = sharp.Read<int>((IntPtr)(LR2value.baseaddr - 0x616ec - 0x60), false);
+                            LR2value.fullscreen_width = sharp.Read<int>((IntPtr)(LR2value.baseaddr - 0x60890 - 0x60), false);
+                            LR2value.fullscreen_height = sharp.Read<int>((IntPtr)(LR2value.baseaddr - 0x6088c - 0x60), false);
+                        }
                         //여기까지 흰숫 계산을 위한 변수들
 
                         //만약 window_width나 height가 0일 경우 풀스크린으로 계산
