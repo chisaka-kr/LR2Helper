@@ -17,18 +17,18 @@ using System.Xml;
 
 namespace LR2Helper_GV {
     public partial class mainForm : Form {
-        public static string prog_version = "L2.0.1";
-        public static string prog_build = "170212:0 alpha";
+        static string prog_version = "L2.0.1";
+        static string prog_build = "170212:1 release";
 
-        public IntPtr prog_baseaddr; // 보통 0x400000;
-        public IntPtr vmem_getbaseaddr_asm; // base address를 빼올 코드 
-        public IntPtr vmem_getbaseaddr_reg; // base address를 저장할 공간
-        public IntPtr vmem_dstnumber_300_asm;
-        public IntPtr vmem_dstnumber_300_reg;
-        public ushort flag_interrupt = 0;
-        public ushort flag_unsupportedskinmode = 0;
-        public MemorySharp sharp;
-        public LR2value LR2value = new LR2value();
+        IntPtr prog_baseaddr; // 보통 0x400000;
+        IntPtr vmem_getbaseaddr_asm; // base address를 빼올 코드 
+        IntPtr vmem_getbaseaddr_reg; // base address를 저장할 공간
+        IntPtr vmem_dstnumber_300_asm;
+        IntPtr vmem_dstnumber_300_reg;
+        ushort flag_interrupt = 0;
+        ushort flag_unsupportedskinmode = 0;
+        MemorySharp sharp;
+        LR2value LR2value = new LR2value();
 
         /* ini로 설정 저장. 사용하지 않음
         [DllImport("kernel32")]
@@ -68,27 +68,51 @@ namespace LR2Helper_GV {
                     setting_make.WriteStartElement("SkinTemplate");
 
                     setting_make.WriteStartElement("skin");
-                    setting_make.WriteAttributeString("dst_x", "321");
+                    setting_make.WriteAttributeString("dst_x", "194");
+                    setting_make.WriteAttributeString("dst_y", "315");
+                    setting_make.WriteString("LR2 Default");
+                    setting_make.WriteEndElement();
+
+                    setting_make.WriteStartElement("skin");
+                    setting_make.WriteAttributeString("dst_x", "144");
                     setting_make.WriteAttributeString("dst_y", "321");
-                    setting_make.WriteString("OADX+ AC,CS SKIN(SD)");
+                    setting_make.WriteString("OADX+ AC SKIN(SD)");
                     setting_make.WriteEndElement();
 
                     setting_make.WriteStartElement("skin");
-                    setting_make.WriteAttributeString("dst_x", "482");
+                    setting_make.WriteAttributeString("dst_x", "233");
+                    setting_make.WriteAttributeString("dst_y", "321");
+                    setting_make.WriteString("OADX+ CS SKIN(SD)");
+                    setting_make.WriteEndElement();
+
+                    setting_make.WriteStartElement("skin");
+                    setting_make.WriteAttributeString("dst_x", "288");
                     setting_make.WriteAttributeString("dst_y", "482");
-                    setting_make.WriteString("WMIX_HD AC/EC AC(HD)");
+                    setting_make.WriteString("WMIX_HD AC (HD)");
                     setting_make.WriteEndElement();
 
                     setting_make.WriteStartElement("skin");
-                    setting_make.WriteAttributeString("dst_x", "482");
+                    setting_make.WriteAttributeString("dst_x", "375");
                     setting_make.WriteAttributeString("dst_y", "482");
                     setting_make.WriteString("WMIX_HD WIDE(HD)");
                     setting_make.WriteEndElement();
 
                     setting_make.WriteStartElement("skin");
-                    setting_make.WriteAttributeString("dst_x", "482");
+                    setting_make.WriteAttributeString("dst_x", "288");
+                    setting_make.WriteAttributeString("dst_y", "482");
+                    setting_make.WriteString("Endless Circulation SE(HD)");
+                    setting_make.WriteEndElement();
+
+                    setting_make.WriteStartElement("skin");
+                    setting_make.WriteAttributeString("dst_x", "431");
+                    setting_make.WriteAttributeString("dst_y", "713");
+                    setting_make.WriteString("LITONE5 AC(FHD)");
+                    setting_make.WriteEndElement();
+
+                    setting_make.WriteStartElement("skin");
+                    setting_make.WriteAttributeString("dst_x", "513");
                     setting_make.WriteAttributeString("dst_y", "836");
-                    setting_make.WriteString("LITONE5(FHD)");
+                    setting_make.WriteString("LITONE5 HALF WIDE(FHD)");
                     setting_make.WriteEndElement();
 
                     setting_make.WriteEndElement();
@@ -98,8 +122,8 @@ namespace LR2Helper_GV {
                     setting_make.Close();
                 }
             } finally {
-                skin_template_dstx["default"] = textBoxDSTX.Text;
-                skin_template_dsty["default"] = textBoxDSTY.Text;
+                skin_template_dstx["---"] = textBoxDSTX.Text;
+                skin_template_dsty["---"] = textBoxDSTY.Text;
                 using (XmlReader setting_root = XmlReader.Create(@setting_path)) {
                     while (setting_root.Read()) {
                         if (setting_root.IsStartElement()) {
@@ -232,7 +256,7 @@ namespace LR2Helper_GV {
                     if (flag_interrupt == 1) {
                         break;
                     }
-                } catch(Exception) {
+                } catch (Exception) {
                     toolStripStatusLabel1.Text = "Unexpected error occured. program load failed.";
                     Thread.Sleep(1000);
                     break;
@@ -336,18 +360,18 @@ namespace LR2Helper_GV {
                         LR2value.bpm_power = sharp.Read<double>((IntPtr)(LR2value.baseaddr + 0x9FCE0), false);
                         LR2value.scrollspeed = sharp.Read<int>((IntPtr)(LR2value.baseaddr + 0x98), false);
                         //여기까지 녹숫 계산을 위한 변수들
-                        LR2value.window_width = sharp.Read<int>((IntPtr)(LR2value.baseaddr - 0x61700), false);
-                        LR2value.window_height = sharp.Read<int>((IntPtr)(LR2value.baseaddr - 0x616fc), false);
-                        LR2value.resolution_width = sharp.Read<int>((IntPtr)(LR2value.baseaddr - 0x616f0), false);
-                        LR2value.resolution_height = sharp.Read<int>((IntPtr)(LR2value.baseaddr - 0x616ec), false);
-                        LR2value.fullscreen_width= sharp.Read<int>((IntPtr)(LR2value.baseaddr - 0x60890), false);
-                        LR2value.fullscreen_height = sharp.Read<int>((IntPtr)(LR2value.baseaddr - 0x6088c), false);
+                        LR2value.window_width = sharp.Read<int>((IntPtr)(LR2value.baseaddr - 0x61700 - 0x60), false);
+                        LR2value.window_height = sharp.Read<int>((IntPtr)(LR2value.baseaddr - 0x616fc - 0x60), false);
+                        LR2value.resolution_width = sharp.Read<int>((IntPtr)(LR2value.baseaddr - 0x616f0 - 0x60), false);
+                        LR2value.resolution_height = sharp.Read<int>((IntPtr)(LR2value.baseaddr - 0x616ec - 0x60), false);
+                        LR2value.fullscreen_width = sharp.Read<int>((IntPtr)(LR2value.baseaddr - 0x60890 - 0x60), false);
+                        LR2value.fullscreen_height = sharp.Read<int>((IntPtr)(LR2value.baseaddr - 0x6088c - 0x60), false);
                         //여기까지 흰숫 계산을 위한 변수들
-                        
+
                         //만약 window_width나 height가 0일 경우 풀스크린으로 계산
                         if ((LR2value.window_height == 0) || (LR2value.window_width == 0)) {
                             LR2value.window_width = LR2value.fullscreen_width;
-                            LR2value.window_width = LR2value.fullscreen_hei;
+                            LR2value.window_height = LR2value.fullscreen_height;
                         }
 
                         //하이스피드 고정 옵션이 있다면 보정한다
@@ -382,11 +406,12 @@ namespace LR2Helper_GV {
                         }
                         green_number = 10 * ((2173.0 / 725.0) * 1000) * (dst_y) / (LR2value.hispeed * LR2value.scrollspeed) * (150.0 / cal_bpm) * (1.0 - (LR2value.lanecover / 100.0));
                         //게산식 : 10*((2173/725)*1000)*(DST_Y)/(HISPD*SCRSPD)*(150/BPM)*(1-(LANECOVER/100))
-                        white_number = (1 - ((288.0 * dst_y * (LR2value.window_width/ LR2value.window_height)) / (482.0 * dst_x * (LR2value.resolution_width / LR2value.resolution_height))) * (1.0 - (LR2value.lanecover / dst_y))) * 1000.0;
+                        //white_number = (1.0 - ((288.0 * dst_y * (LR2value.window_width * 1.0 / LR2value.window_height * 1.0)) / (482.0 * dst_x * (LR2value.resolution_width * 1.0 / LR2value.resolution_height * 1.0))) * (1.0 - (LR2value.lanecover * 1.0 / dst_y * 1.0))) * 1000.0;
+                        white_number = (1.0 - ((288.0 * dst_y * (LR2value.window_width * 1.0 / LR2value.window_height * 1.0)) / (482.0 * dst_x * (LR2value.resolution_width * 1.0 / LR2value.resolution_height * 1.0))) * (1.0 - (LR2value.lanecover * 1.0 / 100 * 1.0))) * 1000.0;
                         //계산식 : ((1-((288*DST_Y*(WINDOW_W/WINDOW_H))/(482*DST_X*(RESOL_W/RESOL_H)))*(1-(LANECOVER/DST_Y)))*1000)
 
-                        toolStripStatusLabel1.Text = "Green Number: " + Convert.ToInt32(green_number).ToString();
-                        toolStripStatusLabel1.Text += "White Number: " + Convert.ToInt32(white_number).ToString();
+                        toolStripStatusLabel1.Text = "Green Number: " + Convert.ToInt32(green_number).ToString() + " White Number: " + Convert.ToInt32(white_number).ToString();
+
 
                         //302와 303에 녹숫과 흰숫을 쓴다. 참고로 vmem_dstnumber_300_reg는 300번 주소를 가리킨다.
                         sharp.Write<int>(vmem_dstnumber_300_reg + 0x8, Convert.ToInt32(green_number), false);
@@ -430,7 +455,7 @@ namespace LR2Helper_GV {
 
         private void comboBoxDSTtemplate_TextChanged(object sender, EventArgs e) {
             try {
-                if (comboBoxDSTtemplate.Text != "default") {
+                if (comboBoxDSTtemplate.Text != "---") {
                     textBoxDSTY.Text = skin_template_dsty[comboBoxDSTtemplate.Text];
                     textBoxDSTX.Text = skin_template_dstx[comboBoxDSTtemplate.Text];
                 }
