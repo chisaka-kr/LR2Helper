@@ -22,7 +22,7 @@ using Tweetinvi.Models;
 namespace LR2Helper_GV {
     public partial class mainForm : Form {
         static string prog_version = "L2.0.2";
-        static string prog_build = "170218:1 alpha";
+        static string prog_build = "170218:2 release";
 
         IntPtr prog_baseaddr; // 보통 0x400000;
         IntPtr vmem_getbaseaddr_asm; // base address를 빼올 코드 
@@ -116,23 +116,22 @@ namespace LR2Helper_GV {
                     setting_update.GetElementsByTagName("dst_y")[0].InnerText = textBoxDSTY.Text;
                     setting_update.GetElementsByTagName("dst_x")[0].InnerText = textBoxDSTX.Text;
                     setting_update.Save(@setting_path);
-                    var process_id = Process.GetProcessesByName("LR2body");
+                    Process[] process_id = Process.GetProcessesByName("");
                     
                     String[] process_name_list = {
+                          "LR2body",
                           "LRHbody",
                           "LR2body_FS10",
                           "LRHbody_FS10",
                           "LR2body_FS9.1",
                           "LRHbody_FS9.1"
                     };
-                    if (process_id.Length == 0) {
                         for (var i = 0; i < process_name_list.Length; i++) {
                             process_id = Process.GetProcessesByName(process_name_list[i]);
                             if (process_id.Length > 0) {
                                 process_name = process_name_list[i];
                                 break;
                             }
-                        }
                     }
                     //var process_id = ApplicationFinder.FromProcessName("LRHbody_FS9.1").First();
                     if (process_id.Length > 0) {//process id가 0이 아닐 시
@@ -445,7 +444,7 @@ namespace LR2Helper_GV {
         }
         public void writeLog(string str) {
             if (flag_debug != 1) return;
-            string FilePath = Application.StartupPath + "lr2helper-error.log";
+            string FilePath = Application.StartupPath + "\\lr2helper-error.log";
             string DirPath = Application.StartupPath;
             string temp;
 
@@ -475,9 +474,7 @@ namespace LR2Helper_GV {
         private string getActiveWindowTitle() {
             const int nChars = 256;
             StringBuilder Buff = new StringBuilder(nChars);
-            IntPtr handle = GetForegroundWindow();
-
-            if (GetWindowText(handle, Buff, nChars) > 0) {
+            if (GetWindowText(GetForegroundWindow(), Buff, nChars) > 0) {
                 return Buff.ToString();
             }
             return null;

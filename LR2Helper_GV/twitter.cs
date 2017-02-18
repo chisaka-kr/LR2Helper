@@ -145,7 +145,8 @@ namespace LR2Helper_GV {
                 int id = m.WParam.ToInt32();                                        // The id of the hotkey that was pressed.
 
                 if (id == 0) {
-                    if ((authenticatedUser != null)&&(LR2value.scene == 5)&&(getActiveWindowTitle() == "LR2 beta3 version 100201")) {
+                    String window_title = getActiveWindowTitle();
+                    if ((authenticatedUser != null)&&(LR2value.scene == 5)&&(window_title == "LR2 beta3 version 100201")) {
                         if (this.textBoxTweettext.Text.Length < 140) {
                             var window = sharp.Windows.MainWindow;
                             keybd_event((byte)Keys.F6, 0x00, 0x00, 0);
@@ -166,7 +167,7 @@ namespace LR2Helper_GV {
                         }
                     } 
                     else {
-                        toolStripStatusLabel1.Text = "Please run on result screen";
+                        toolStripStatusLabel1.Text = "Please run on result screen or twitter isn't authenticated.";
                     }
                 }
             }
