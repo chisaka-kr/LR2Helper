@@ -22,7 +22,7 @@ using Tweetinvi.Models;
 namespace LR2Helper_GV {
     public partial class mainForm : Form {
         static string prog_version = "L2.0.2";
-        static string prog_build = "170218:0 alpha";
+        static string prog_build = "170218:1 alpha";
 
         IntPtr prog_baseaddr; // 보통 0x400000;
         IntPtr vmem_getbaseaddr_asm; // base address를 빼올 코드 
@@ -34,6 +34,7 @@ namespace LR2Helper_GV {
         ushort flag_unsupportedskinmode = 0;
         ushort flag_twitterlogon = 0;
         ushort flag_resolution_manual_mode = 0;
+        ushort flag_debug = 0;
 
         string process_name;
         string process_path;
@@ -62,6 +63,13 @@ namespace LR2Helper_GV {
         private static extern bool UnregisterHotKey(IntPtr hWnd, int id);
         [System.Runtime.InteropServices.DllImport("user32.dll")]
         public static extern void keybd_event(uint vk, uint scan, uint flags, uint extraInfo);
+
+        //현재 액티브인 윈도우 창의 이름을 얻기 위해
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        static extern IntPtr GetForegroundWindow();
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        static extern int GetWindowText(IntPtr hWnd, StringBuilder text, int count);
+
 
         enum KeyModifier {
             None = 0,
@@ -192,8 +200,9 @@ namespace LR2Helper_GV {
                     if (flag_interrupt == 1) {
                         break;
                     }
-                } catch (Exception) {
+                } catch (Exception e) {
                     toolStripStatusLabel1.Text = "Unexpected error occured. program load failed.";
+                    writeLog(e.ToString());
                     Thread.Sleep(1000);
                     break;
                 }
@@ -233,7 +242,9 @@ namespace LR2Helper_GV {
                         break;
                     }
                     Thread.Sleep(1000);
-                } catch (Exception) { }
+                } catch (Exception e) {
+                    writeLog(e.ToString());
+                }
             }
         }
         public void startWork() { // 모든 리프레시 작업은 여기서 (스레드를 나눌 필요가 있으면 다른 방법으로)
@@ -245,8 +256,9 @@ namespace LR2Helper_GV {
                         getGreenvalue();
                         getSongstatus();
                     }
-                } catch (Exception) {
+                } catch (Exception e) {
                     toolStripStatusLabel1.Text = "Critical error occured. Please restart LR2Helper.";
+                    writeLog(e.ToString());
                 }
                 if (flag_interrupt == 1) {
                     break;
@@ -258,10 +270,11 @@ namespace LR2Helper_GV {
             try {
                 XmlDocument setting_file = new XmlDocument();
                 setting_file.Load(@setting_path);
-            } catch (Exception) {
+            } catch (Exception e) {
                 toolStripStatusLabel1.Text = "Failed load setting file. Try to create it.";
                 if (makeXML() == false) {
                     toolStripStatusLabel1.Text = "Failed create setting file.";
+                    writeLog(e.ToString());
                 }
 
             } finally {
@@ -301,6 +314,10 @@ namespace LR2Helper_GV {
                                         tweet_template = setting_root.Value.Trim();
                                     }
                                     break;
+                                case "debug_mode":
+                                    if (setting_root.Read()) {
+                                        flag_debug = Convert.ToUInt16(setting_root.Value.Trim());
+                                    }
                                     break;
                                 case "dst_x":
                                     if (setting_root.Read()) {
@@ -353,6 +370,7 @@ namespace LR2Helper_GV {
                     setting_make.WriteElementString("resolution_height", "720");
                     setting_make.WriteElementString("monitor_width", "1280");
                     setting_make.WriteElementString("monitor_height", "720");
+                    setting_make.WriteElementString("debug_mode", "0");
                     setting_make.WriteEndElement();
 
                     setting_make.WriteStartElement("skin_template");
@@ -419,11 +437,52 @@ namespace LR2Helper_GV {
                     setting_make.Close();
                     return true;
                 }
-            } catch (Exception) {
+            } catch (Exception e) {
+                writeLog(e.ToString());
                 return false;
             }
 
         }
+        public void writeLog(string str) {
+            if (flag_debug != 1) return;
+            string FilePath = Application.StartupPath + "lr2helper-error.log";
+            string DirPath = Application.StartupPath;
+            string temp;
+
+            DirectoryInfo di = new DirectoryInfo(DirPath);
+            FileInfo fi = new FileInfo(FilePath);
+
+            try {
+                if (di.Exists != true) Directory.CreateDirectory(DirPath);
+
+                if (fi.Exists != true) {
+                    using (StreamWriter sw = new StreamWriter(FilePath)) {
+                        temp = string.Format("[{0}] : {1}", DateTime.Now, str);
+                        sw.WriteLine(temp);
+                        sw.Close();
+                    }
+                } else {
+                    using (StreamWriter sw = File.AppendText(FilePath)) {
+                        temp = string.Format("[{0}] : {1}", DateTime.Now, str);
+                        sw.WriteLine(temp);
+                        sw.Close();
+                    }
+                }
+            } catch (Exception e) {
+                MessageBox.Show(e.ToString());
+            }
+        }
+        private string getActiveWindowTitle() {
+            const int nChars = 256;
+            StringBuilder Buff = new StringBuilder(nChars);
+            IntPtr handle = GetForegroundWindow();
+
+            if (GetWindowText(handle, Buff, nChars) > 0) {
+                return Buff.ToString();
+            }
+            return null;
+        }
+
 
         //다양한 이벤트들
         private void mainForm_Load(object sender, EventArgs e) {
@@ -479,8 +538,7 @@ namespace LR2Helper_GV {
 
         private void buttonGettoken_Click(object sender, EventArgs e) {
             if (textBoxTwittertoken.Text.Length == 7) {
-
-
+                try {
                     userCredentials = AuthFlow.CreateCredentialsFromVerifierCode(textBoxTwittertoken.Text, authenticationContext);
                     Auth.SetCredentials(userCredentials);
                     authenticatedUser = User.GetAuthenticatedUser();
@@ -489,7 +547,7 @@ namespace LR2Helper_GV {
                         buttonGettwittertoken.Enabled = false;
                         buttonOpentwittertoken.Enabled = false;
                         textBoxTwittertoken.Enabled = false;
-                        buttonTweetsend.Enabled = true;
+                       //buttonTweetsend.Enabled = true;
                         textBoxTwittertoken.Text = "";
                         buttonOpentwittertoken.Text = "Login Sucess";
 
@@ -500,7 +558,10 @@ namespace LR2Helper_GV {
                         setting_update.GetElementsByTagName("auth_secret")[0].InnerText = userCredentials.AccessTokenSecret;
                         setting_update.Save(@setting_path);
                     }
-
+                }
+                catch (Exception err) {
+                    writeLog(err.ToString());
+                }
 
             }
         }

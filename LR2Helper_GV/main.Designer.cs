@@ -40,11 +40,12 @@
             this.labelDSTYtemplate = new System.Windows.Forms.Label();
             this.labelDSTX = new System.Windows.Forms.Label();
             this.tabPage2 = new System.Windows.Forms.TabPage();
-            this.buttonTweetsend = new System.Windows.Forms.Button();
             this.textBoxTweettext = new System.Windows.Forms.TextBox();
             this.textBoxTwittertoken = new System.Windows.Forms.TextBox();
             this.buttonGettwittertoken = new System.Windows.Forms.Button();
             this.buttonOpentwittertoken = new System.Windows.Forms.Button();
+            this.labelHotkeyhelp = new System.Windows.Forms.Label();
+            this.buttonTweetsend = new System.Windows.Forms.Button();
             this.statusStrip1.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
@@ -167,6 +168,7 @@
             // 
             // tabPage2
             // 
+            this.tabPage2.Controls.Add(this.labelHotkeyhelp);
             this.tabPage2.Controls.Add(this.buttonTweetsend);
             this.tabPage2.Controls.Add(this.textBoxTweettext);
             this.tabPage2.Controls.Add(this.textBoxTwittertoken);
@@ -179,17 +181,6 @@
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "Twitter";
             this.tabPage2.UseVisualStyleBackColor = true;
-            // 
-            // buttonTweetsend
-            // 
-            this.buttonTweetsend.Enabled = false;
-            this.buttonTweetsend.Location = new System.Drawing.Point(342, 64);
-            this.buttonTweetsend.Name = "buttonTweetsend";
-            this.buttonTweetsend.Size = new System.Drawing.Size(41, 23);
-            this.buttonTweetsend.TabIndex = 4;
-            this.buttonTweetsend.Text = "▶";
-            this.buttonTweetsend.UseVisualStyleBackColor = true;
-            this.buttonTweetsend.Click += new System.EventHandler(this.buttonTweetsend_Click);
             // 
             // textBoxTweettext
             // 
@@ -225,6 +216,26 @@
             this.buttonOpentwittertoken.Text = "Twitter Login";
             this.buttonOpentwittertoken.UseVisualStyleBackColor = true;
             this.buttonOpentwittertoken.Click += new System.EventHandler(this.buttonOpentwittertoken_Click);
+            // 
+            // labelHotkeyhelp
+            // 
+            this.labelHotkeyhelp.AutoSize = true;
+            this.labelHotkeyhelp.Location = new System.Drawing.Point(188, 46);
+            this.labelHotkeyhelp.Name = "labelHotkeyhelp";
+            this.labelHotkeyhelp.Size = new System.Drawing.Size(176, 12);
+            this.labelHotkeyhelp.TabIndex = 5;
+            this.labelHotkeyhelp.Text = "Tweet upload : F11 (on result)";
+            // 
+            // buttonTweetsend
+            // 
+            this.buttonTweetsend.Enabled = false;
+            this.buttonTweetsend.Location = new System.Drawing.Point(342, 64);
+            this.buttonTweetsend.Name = "buttonTweetsend";
+            this.buttonTweetsend.Size = new System.Drawing.Size(41, 23);
+            this.buttonTweetsend.TabIndex = 4;
+            this.buttonTweetsend.Text = "▶";
+            this.buttonTweetsend.UseVisualStyleBackColor = true;
+            this.buttonTweetsend.Click += new System.EventHandler(this.buttonTweetsend_Click);
             // 
             // mainForm
             // 
@@ -268,8 +279,9 @@
         private System.Windows.Forms.Button buttonOpentwittertoken;
         private System.Windows.Forms.TextBox textBoxTwittertoken;
         private System.Windows.Forms.Button buttonGettwittertoken;
-        private System.Windows.Forms.Button buttonTweetsend;
         private System.Windows.Forms.TextBox textBoxTweettext;
+        private System.Windows.Forms.Label labelHotkeyhelp;
+        private System.Windows.Forms.Button buttonTweetsend;
     }
 }
 

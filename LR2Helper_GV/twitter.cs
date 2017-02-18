@@ -49,7 +49,7 @@ namespace LR2Helper_GV {
                         buttonGettwittertoken.Enabled = false;
                         buttonOpentwittertoken.Enabled = false;
                         textBoxTwittertoken.Enabled = false;
-                        buttonTweetsend.Enabled = true;
+                        //buttonTweetsend.Enabled = true;
                         buttonOpentwittertoken.Text = "Already logged in";
                     }
                     /*
@@ -62,8 +62,8 @@ namespace LR2Helper_GV {
                         Console.WriteLine("The following error occured : '{0}'", latestException.TwitterDescription);
                     }
                     */
-                } catch (Exception) {
-                    
+                } catch (Exception e) {
+                    writeLog(e.ToString());
                 } finally { }
 
             }
@@ -145,7 +145,7 @@ namespace LR2Helper_GV {
                 int id = m.WParam.ToInt32();                                        // The id of the hotkey that was pressed.
 
                 if (id == 0) {
-                    if (authenticatedUser != null) {
+                    if ((authenticatedUser != null)&&(LR2value.scene == 5)&&(getActiveWindowTitle() == "LR2 beta3 version 100201")) {
                         if (this.textBoxTweettext.Text.Length < 140) {
                             var window = sharp.Windows.MainWindow;
                             keybd_event((byte)Keys.F6, 0x00, 0x00, 0);
@@ -164,6 +164,9 @@ namespace LR2Helper_GV {
                                 toolStripStatusLabel1.Text = "Tweet failed";
                             }
                         }
+                    } 
+                    else {
+                        toolStripStatusLabel1.Text = "Please run on result screen";
                     }
                 }
             }
