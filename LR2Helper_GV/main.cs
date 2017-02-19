@@ -22,7 +22,7 @@ using Tweetinvi.Models;
 namespace LR2Helper_GV {
     public partial class mainForm : Form {
         static string prog_version = "L2.0.2";
-        static string prog_build = "170218:2 release";
+        static string prog_build = "170219:0 release";
 
         IntPtr prog_baseaddr; // 보통 0x400000;
         IntPtr vmem_getbaseaddr_asm; // base address를 빼올 코드 
@@ -253,10 +253,16 @@ namespace LR2Helper_GV {
                 try {
                     if (LR2value.baseaddr > 0) {
                         getGreenvalue();
-                        getSongstatus();
                     }
                 } catch (Exception e) {
                     toolStripStatusLabel1.Text = "Critical error occured. Please restart LR2Helper.";
+                    writeLog(e.ToString());
+                }
+                try {
+                    if (LR2value.baseaddr > 0) {
+                        getSongstatus(this.tweet_template,0);
+                    }
+                } catch (Exception e) {
                     writeLog(e.ToString());
                 }
                 if (flag_interrupt == 1) {
@@ -393,6 +399,18 @@ namespace LR2Helper_GV {
                     setting_make.WriteEndElement();
 
                     setting_make.WriteStartElement("skin");
+                    setting_make.WriteAttributeString("dst_x", "236");
+                    setting_make.WriteAttributeString("dst_y", "385");
+                    setting_make.WriteString("DRFlat(SD)");
+                    setting_make.WriteEndElement();
+
+                    setting_make.WriteStartElement("skin");
+                    setting_make.WriteAttributeString("dst_x", "194");
+                    setting_make.WriteAttributeString("dst_y", "320");
+                    setting_make.WriteString("spaaaarking!!(SD)");
+                    setting_make.WriteEndElement();
+
+                    setting_make.WriteStartElement("skin");
                     setting_make.WriteAttributeString("dst_x", "288");
                     setting_make.WriteAttributeString("dst_y", "482");
                     setting_make.WriteString("WMIX_HD AC (HD)");
@@ -422,14 +440,15 @@ namespace LR2Helper_GV {
                     setting_make.WriteString("LITONE5 HALF WIDE(FHD)");
                     setting_make.WriteEndElement();
 
+                    setting_make.WriteEndElement();
+
                     setting_make.WriteStartElement("twitter");
                     setting_make.WriteElementString("auth_key", "");
                     setting_make.WriteElementString("auth_secret", "");
-                    setting_make.WriteElementString("tweet_template", "#MUSIC_NAME# (#MUSIC_DIFF_LEVEL#)を #CLEAR_TYPE#しました!");
-                    
+                    setting_make.WriteElementString("tweet_template", "#MUSIC_NAME# (#MUSIC_DIFF_LEVEL#)を#CLEAR_TYPE#しました!");
+                    setting_make.WriteElementString("tweet_template_sub", "@null #MUSIC_NAME# (#MUSIC_DIFF_LEVEL#)を#CLEAR_TYPE#しました!");
                     setting_make.WriteEndElement();
 
-                    setting_make.WriteEndElement();
                     setting_make.WriteEndElement();
                     setting_make.WriteEndDocument();
                     setting_make.Flush();
@@ -488,6 +507,8 @@ namespace LR2Helper_GV {
 
         private void mainForm_FormClosing(object sender, FormClosingEventArgs e) {
             flag_interrupt = 1;
+            UnregisterHotKey(this.Handle, 0);
+            UnregisterHotKey(this.Handle, 1);
             //좀 더 좋은 방법을 찾는게 좋겠다
         }
 

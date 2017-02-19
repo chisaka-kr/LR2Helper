@@ -26,8 +26,9 @@ namespace LR2Helper_GV {
         public string auth_key = "";
         public string auth_secret = "";
         public string tweet_template = "#MUSIC_NAME# (#MUSIC_DIFF_LEVEL#)を #CLEAR_TYPE#しました!";
+        public string tweet_template_sub = "@null #MUSIC_NAME# (#MUSIC_DIFF_LEVEL#)を #CLEAR_TYPE#しました!";
         delegate void SetTextCallback(string text);
-        
+
         // Create a new set of credentials for the application.
 
         public void getTwitterid() {
@@ -35,8 +36,8 @@ namespace LR2Helper_GV {
             // Init the authentication process and store the related `AuthenticationContext`.
             authenticationContext = AuthFlow.InitAuthentication(appCredentials);
 
-            RegisterHotKey(this.Handle, 0, (int)KeyModifier.None, Keys.F11.GetHashCode());
-            //UnregisterHotKey(this.Handle, 0);
+            RegisterHotKey(this.Handle, 0, (int)KeyModifier.None, Keys.F11.GetHashCode()); // F11 핫키 등록
+            RegisterHotKey(this.Handle, 1, (int)KeyModifier.Alt, Keys.F11.GetHashCode()); // ALT+F11 핫키 등록
 
             if ((auth_key.Length > 0) && (auth_secret.Length > 0)) {
                 try {
@@ -68,12 +69,12 @@ namespace LR2Helper_GV {
 
             }
         }
-        public void getSongstatus() {
-            
-            var now_scene = sharp.Read<int>((IntPtr)LR2value.baseaddr + 0x23db4, false);
-            if ((now_scene != LR2value.scene) && (now_scene == 5)) { //리절트 화면에 진입했을 경우
+        public void getSongstatus(string text,int flag) {
 
-                
+            var now_scene = sharp.Read<int>((IntPtr)LR2value.baseaddr + 0x23db4, false);
+            if (((now_scene != LR2value.scene) && (now_scene == 5))||((now_scene == 5)&&(flag == 1))) { //리절트 화면에 진입했을 경우
+                delay(500); // 진입 후 500ms만 기다린다 (NO PLAY라고 뜨는 걸 막기위해)
+
                 LR2value.music_name = sharp.ReadString((IntPtr)sharp.Read<int>((IntPtr)LR2value.baseaddr + 0x21F20, false), Encoding.GetEncoding(932), false);
                 LR2value.music_diff = sharp.ReadString((IntPtr)sharp.Read<int>((IntPtr)LR2value.baseaddr + 0x21F24, false), Encoding.GetEncoding(932), false);
                 LR2value.music_diff_level = sharp.ReadString((IntPtr)sharp.Read<int>((IntPtr)LR2value.baseaddr + 0x21f3c, false), Encoding.GetEncoding(932), false);
@@ -95,30 +96,61 @@ namespace LR2Helper_GV {
                 Dictionary<String, String> replace_list = new Dictionary<String, String>();
                 replace_list["#MUSIC_NAME#"] = LR2value.music_name;
                 replace_list["#MUSIC_DIFF_LEVEL#"] = level;
+                replace_list["#MUSIC_DIFF#"] = LR2value.music_diff;
+                replace_list["#MUSIC_GENRE#"] = LR2value.music_genre;
+                replace_list["#MUSIC_ARTIST#"] = LR2value.music_artist;
+                replace_list["#MUSIC_ARTIST2#"] = LR2value.music_artist2;
                 replace_list["#CLEAR_TYPE#"] = LR2value.str_clear_type[LR2value.clear_type];
                 replace_list["#GAUGE_TYPE#"] = LR2value.str_gauge_type[LR2value.gauge_type];
 
 
-                String tweet_text = tweet_template;
+                String tweet_text = text;
                 foreach (var replace_key in replace_list.Keys) {
-                    tweet_text = tweet_text.Replace(replace_key,replace_list[replace_key]);
+                    tweet_text = tweet_text.Replace(replace_key, replace_list[replace_key]);
                 }
                 setTweettext(tweet_text);
             }
             LR2value.scene = now_scene;
 
-            
-            
+
+
         }
         private void setTweettext(string text) {
             if (this.textBoxTweettext.InvokeRequired) {
                 SetTextCallback d = new SetTextCallback(setTweettext);
                 this.Invoke(d, new object[] { text });
             } else {
+               
                 this.textBoxTweettext.Text = text;
             }
         }
-
+        private void sendTweet(string text) {
+            String window_title = getActiveWindowTitle();
+            if ((authenticatedUser != null) && (LR2value.scene == 5) && (window_title == "LR2 beta3 version 100201")) {
+                if (text.Length < 140) {
+                    var window = sharp.Windows.MainWindow;
+                    keybd_event((byte)Keys.F6, 0x00, 0x00, 0);
+                    delay(200);
+                    keybd_event((byte)Keys.F6, 0x00, 0x02, 0);
+                    delay(1000);
+                    var file = Directory.GetFiles(@process_path, "LR2 *.png").Last();
+                    var image = File.ReadAllBytes(file);
+                    var media = Upload.UploadImage(image);
+                    var tweet = Tweet.PublishTweet(text, new PublishTweetOptionalParameters {
+                        Medias = { media }
+                    });
+                    if (tweet != null) {
+                        toolStripStatusLabel1.Text = "Tweet succeeded";
+                    } else {
+                        toolStripStatusLabel1.Text = "Tweet failed";
+                    }
+                } else {
+                    toolStripStatusLabel1.Text = "Tweet is too long";
+                }
+            } else {
+                toolStripStatusLabel1.Text = "Please run on result screen or twitter isn't authenticated.";
+            }
+        }
         private void buttonTweetsend_Click(object sender, EventArgs e) {
             if (authenticatedUser != null) {
                 if (this.textBoxTweettext.Text.Length < 140) {
@@ -143,32 +175,11 @@ namespace LR2Helper_GV {
                 Keys key = (Keys)(((int)m.LParam >> 16) & 0xFFFF);                  // The key of the hotkey that was pressed.
                 KeyModifier modifier = (KeyModifier)((int)m.LParam & 0xFFFF);       // The modifier of the hotkey that was pressed.
                 int id = m.WParam.ToInt32();                                        // The id of the hotkey that was pressed.
-
                 if (id == 0) {
-                    String window_title = getActiveWindowTitle();
-                    if ((authenticatedUser != null)&&(LR2value.scene == 5)&&(window_title == "LR2 beta3 version 100201")) {
-                        if (this.textBoxTweettext.Text.Length < 140) {
-                            var window = sharp.Windows.MainWindow;
-                            keybd_event((byte)Keys.F6, 0x00, 0x00, 0);
-                            delay(200);
-                            keybd_event((byte)Keys.F6, 0x00, 0x02, 0);
-                            delay(1000);
-                            var file = Directory.GetFiles(@process_path, "*.png").Last();
-                            var image = File.ReadAllBytes(file);
-                            var media = Upload.UploadImage(image);
-                            var tweet = Tweet.PublishTweet(this.textBoxTweettext.Text, new PublishTweetOptionalParameters {
-                                Medias = { media }
-                            });
-                            if (tweet != null) {
-                                toolStripStatusLabel1.Text = "Tweet succeeded";
-                            } else {
-                                toolStripStatusLabel1.Text = "Tweet failed";
-                            }
-                        }
-                    } 
-                    else {
-                        toolStripStatusLabel1.Text = "Please run on result screen or twitter isn't authenticated.";
-                    }
+                    sendTweet(this.textBoxTweettext.Text);
+                } else if (id == 1) {
+                    getSongstatus(tweet_template_sub,1);
+                    sendTweet(this.textBoxTweettext.Text);
                 }
             }
         }

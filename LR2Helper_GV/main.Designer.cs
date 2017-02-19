@@ -17,6 +17,7 @@
             {
                 components.Dispose();
             }
+            delay(500); // 아무래도 핫키 등록이 해제되기 전에 아래 명령이 실행되면 exception이 발생하는 모양이니 임시방편으로 이렇게 해두자
             base.Dispose(disposing);
         }
 
