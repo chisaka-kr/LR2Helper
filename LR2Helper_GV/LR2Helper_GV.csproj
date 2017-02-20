@@ -126,6 +126,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="simpleresult.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="greenvalue.cs">
       <SubType>Form</SubType>
     </Compile>

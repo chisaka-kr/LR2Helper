@@ -21,8 +21,8 @@ using Tweetinvi.Models;
 
 namespace LR2Helper_GV {
     public partial class mainForm : Form {
-        static string prog_version = "L2.0.2";
-        static string prog_build = "170219:0 release";
+        static string prog_version = "L2.0.3";
+        static string prog_build = "170220:0 alpha";
 
         IntPtr prog_baseaddr; // 보통 0x400000;
         IntPtr vmem_getbaseaddr_asm; // base address를 빼올 코드 
@@ -117,7 +117,7 @@ namespace LR2Helper_GV {
                     setting_update.GetElementsByTagName("dst_x")[0].InnerText = textBoxDSTX.Text;
                     setting_update.Save(@setting_path);
                     Process[] process_id = Process.GetProcessesByName("");
-                    
+
                     String[] process_name_list = {
                           "LR2body",
                           "LRHbody",
@@ -126,12 +126,12 @@ namespace LR2Helper_GV {
                           "LR2body_FS9.1",
                           "LRHbody_FS9.1"
                     };
-                        for (var i = 0; i < process_name_list.Length; i++) {
-                            process_id = Process.GetProcessesByName(process_name_list[i]);
-                            if (process_id.Length > 0) {
-                                process_name = process_name_list[i];
-                                break;
-                            }
+                    for (var i = 0; i < process_name_list.Length; i++) {
+                        process_id = Process.GetProcessesByName(process_name_list[i]);
+                        if (process_id.Length > 0) {
+                            process_name = process_name_list[i];
+                            break;
+                        }
                     }
                     //var process_id = ApplicationFinder.FromProcessName("LRHbody_FS9.1").First();
                     if (process_id.Length > 0) {//process id가 0이 아닐 시
@@ -142,8 +142,8 @@ namespace LR2Helper_GV {
                         sharp = new MemorySharp(process_id[0]);
                         if (sharp.IsRunning == true) {
                             toolStripStatusLabel1.Text = "LR2 detected.";
-                            
-                            process_path = process_id[0].MainModule.FileName.Replace(process_name+".exe",""); ;
+
+                            process_path = process_id[0].MainModule.FileName.Replace(process_name + ".exe", ""); ;
 
                             prog_baseaddr = new IntPtr(sharp.Modules.RemoteModules.First().BaseAddress.ToInt32());
 
@@ -175,6 +175,11 @@ namespace LR2Helper_GV {
 
                             toolStripStatusLabel1.Text = "LR2 detected.";
 
+                            //sharp.Windows.MainWindow.X = 1280; LR2 윈도우 위치를 옮길 수 있는 명령이지만 별다른 메리트는 없어보이니 보류
+                            //sharp.Windows.MainWindow.Y = 720;
+
+                            //sharp.Windows.MainWindow.Title = sharp.Windows.MainWindow.Title+" + LR2Helper injected";
+
                             Thread th_getBaseaddr = new Thread(new ThreadStart(getBaseaddr));
                             th_getBaseaddr.Start();
                             Thread th_getGreenvalue = new Thread(new ThreadStart(startWork));
@@ -200,10 +205,11 @@ namespace LR2Helper_GV {
                         break;
                     }
                 } catch (Exception e) {
-                    toolStripStatusLabel1.Text = "Unexpected error occured. program load failed.";
-                    writeLog(e.ToString());
-                    Thread.Sleep(1000);
-                    break;
+                    for (uint i = 0; i < 5; i++) {
+                        //뭔지 모를 에러가 났지만 그래도 재시도
+                        toolStripStatusLabel1.Text = "Unexpected error occured. Try to reattach in " + (5 - i) + "s";
+                        Thread.Sleep(1000);
+                    }
                 }
             }
 
@@ -260,7 +266,7 @@ namespace LR2Helper_GV {
                 }
                 try {
                     if (LR2value.baseaddr > 0) {
-                        getSongstatus(this.tweet_template,0);
+                        getSongstatus(this.tweet_template, 0);
                     }
                 } catch (Exception e) {
                     writeLog(e.ToString());
@@ -350,6 +356,11 @@ namespace LR2Helper_GV {
                                 case "auth_secret":
                                     if (setting_root.Read()) {
                                         auth_secret = setting_root.Value.Trim();
+                                    }
+                                    break;
+                                case "tweet_upload_mode":
+                                    if (setting_root.Read()) {
+                                        tweet_upload_mode = Convert.ToInt16(setting_root.Value.Trim());
                                     }
                                     break;
                             }
@@ -447,6 +458,7 @@ namespace LR2Helper_GV {
                     setting_make.WriteElementString("auth_secret", "");
                     setting_make.WriteElementString("tweet_template", "#MUSIC_NAME# (#MUSIC_DIFF_LEVEL#)を#CLEAR_TYPE#しました!");
                     setting_make.WriteElementString("tweet_template_sub", "@null #MUSIC_NAME# (#MUSIC_DIFF_LEVEL#)を#CLEAR_TYPE#しました!");
+                    setting_make.WriteElementString("upload_mode","0");
                     setting_make.WriteEndElement();
 
                     setting_make.WriteEndElement();
@@ -499,6 +511,32 @@ namespace LR2Helper_GV {
             return null;
         }
 
+        public void getLR2value() {
+            LR2value.music_name = sharp.ReadString((IntPtr)sharp.Read<int>((IntPtr)LR2value.baseaddr + 0x21F20, false), Encoding.GetEncoding(932), false);
+            LR2value.music_diff = sharp.ReadString((IntPtr)sharp.Read<int>((IntPtr)LR2value.baseaddr + 0x21F24, false), Encoding.GetEncoding(932), false);
+            LR2value.music_diff_level = sharp.ReadString((IntPtr)sharp.Read<int>((IntPtr)LR2value.baseaddr + 0x21f3c, false), Encoding.GetEncoding(932), false);
+            LR2value.music_diff_hakko = sharp.ReadString((IntPtr)sharp.Read<int>((IntPtr)LR2value.baseaddr + 0x21f44, false), Encoding.GetEncoding(932), false);
+            LR2value.music_genre = sharp.ReadString((IntPtr)sharp.Read<int>((IntPtr)LR2value.baseaddr + 0x21f2c, false), Encoding.GetEncoding(932), false);
+            LR2value.music_artist = sharp.ReadString((IntPtr)sharp.Read<int>((IntPtr)LR2value.baseaddr + 0x21f30, false), Encoding.GetEncoding(932), false);
+            LR2value.music_artist2 = sharp.ReadString((IntPtr)sharp.Read<int>((IntPtr)LR2value.baseaddr + 0x21f34, false), Encoding.GetEncoding(932), false);
+            LR2value.play_clear_type = sharp.Read<int>((IntPtr)LR2value.baseaddr + 0x97b88, false);
+            LR2value.play_gauge_type = sharp.Read<int>((IntPtr)LR2value.baseaddr + 0x8, false);
+            LR2value.play_djlevel = sharp.Read<int>((IntPtr)LR2value.baseaddr + 0x97a48, false) * 9 / 32;
+
+            LR2value.play_pgreat = sharp.Read<int>((IntPtr)LR2value.baseaddr + 0x97988, false);
+            LR2value.play_great = sharp.Read<int>((IntPtr)LR2value.baseaddr + 0x97984, false);
+            LR2value.play_good = sharp.Read<int>((IntPtr)LR2value.baseaddr + 0x97980, false);
+            LR2value.play_bad = sharp.Read<int>((IntPtr)LR2value.baseaddr + 0x9797c, false);
+            LR2value.play_poor = sharp.Read<int>((IntPtr)LR2value.baseaddr + 0x97978, false);
+            LR2value.play_combo = sharp.Read<int>((IntPtr)LR2value.baseaddr + 0x97998, false);
+            LR2value.play_maximum_combo = sharp.Read<int>((IntPtr)LR2value.baseaddr + 0x979BC, false);
+            LR2value.play_score = LR2value.play_pgreat * 2 + LR2value.play_great;
+
+            if (LR2value.play_djlevel > 8) {
+                LR2value.play_djlevel = (LR2value.play_score*100/(LR2value.play_maximum_combo*2))/11;
+            }
+            
+        }
 
         //다양한 이벤트들
         private void mainForm_Load(object sender, EventArgs e) {
@@ -565,7 +603,7 @@ namespace LR2Helper_GV {
                         buttonGettwittertoken.Enabled = false;
                         buttonOpentwittertoken.Enabled = false;
                         textBoxTwittertoken.Enabled = false;
-                       //buttonTweetsend.Enabled = true;
+                        //buttonTweetsend.Enabled = true;
                         textBoxTwittertoken.Text = "";
                         buttonOpentwittertoken.Text = "Login Sucess";
 
@@ -576,11 +614,29 @@ namespace LR2Helper_GV {
                         setting_update.GetElementsByTagName("auth_secret")[0].InnerText = userCredentials.AccessTokenSecret;
                         setting_update.Save(@setting_path);
                     }
-                }
-                catch (Exception err) {
+                } catch (Exception err) {
                     writeLog(err.ToString());
                 }
 
+            }
+        }
+
+        private void tabControl1_TabIndexChanged(object sender, EventArgs e) {
+
+        }
+
+        private void tabControl1_Selected(object sender, TabControlEventArgs e) {
+
+            if (e.TabPageIndex == 2) {
+                mainForm.ActiveForm.Width = 423;
+                mainForm.ActiveForm.Height = 690;
+                tabControl1.Width = 423;
+                tabControl1.Height = 630;
+            } else {
+                mainForm.ActiveForm.Width = 423;
+                mainForm.ActiveForm.Height = 180;
+                tabControl1.Width = 423;
+                tabControl1.Height = 120;
             }
         }
     }
@@ -616,14 +672,26 @@ namespace LR2Helper_GV {
         public string music_artist;
         public string music_artist2;
 
-        public int gauge_type;
-        public int freq_val;
-        public int freq_type;
-        public int freq_bool;
-        public int random_type;
-        public int clear_type;
+        public int play_djlevel;
+        public int play_gauge_type;
+        public int play_freq_val;
+        public int play_freq_type;
+        public int play_freq_bool;
+        public int play_random_type;
+        public int play_clear_type;
+
+        public int play_score;
+
+        public int play_pgreat;
+        public int play_great;
+        public int play_good;
+        public int play_bad;
+        public int play_poor;
+        public int play_combo;
+        public int play_maximum_combo;
+
         public string[] str_random_type = {
-                                          
+
                                           };
         public string[] str_gauge_type = {
                                            "NORMAL",
@@ -641,9 +709,19 @@ namespace LR2Helper_GV {
                                             "HARD CLEAR",
                                             "FULL COMBO",
                                           };
-
+        public string[] str_djlevel = {
+            "F",
+            "F",
+            "E",
+            "D",
+            "C",
+            "B",
+            "A",
+            "AA",
+            "AAA"
+        };
         public int play_count;
-               
+
         public int scene;
 
     }

@@ -27,6 +27,7 @@ namespace LR2Helper_GV {
         public string auth_secret = "";
         public string tweet_template = "#MUSIC_NAME# (#MUSIC_DIFF_LEVEL#)を #CLEAR_TYPE#しました!";
         public string tweet_template_sub = "@null #MUSIC_NAME# (#MUSIC_DIFF_LEVEL#)を #CLEAR_TYPE#しました!";
+        public int tweet_upload_mode = 0;
         delegate void SetTextCallback(string text);
 
         // Create a new set of credentials for the application.
@@ -69,21 +70,13 @@ namespace LR2Helper_GV {
 
             }
         }
-        public void getSongstatus(string text,int flag) {
+        public void getSongstatus(string text, int flag) {
 
             var now_scene = sharp.Read<int>((IntPtr)LR2value.baseaddr + 0x23db4, false);
-            if (((now_scene != LR2value.scene) && (now_scene == 5))||((now_scene == 5)&&(flag == 1))) { //리절트 화면에 진입했을 경우
+            if (((now_scene != LR2value.scene) && (now_scene == 5)) || ((now_scene == 5) && (flag == 1))) { //리절트 화면에 진입했을 경우
                 delay(500); // 진입 후 500ms만 기다린다 (NO PLAY라고 뜨는 걸 막기위해)
 
-                LR2value.music_name = sharp.ReadString((IntPtr)sharp.Read<int>((IntPtr)LR2value.baseaddr + 0x21F20, false), Encoding.GetEncoding(932), false);
-                LR2value.music_diff = sharp.ReadString((IntPtr)sharp.Read<int>((IntPtr)LR2value.baseaddr + 0x21F24, false), Encoding.GetEncoding(932), false);
-                LR2value.music_diff_level = sharp.ReadString((IntPtr)sharp.Read<int>((IntPtr)LR2value.baseaddr + 0x21f3c, false), Encoding.GetEncoding(932), false);
-                LR2value.music_diff_hakko = sharp.ReadString((IntPtr)sharp.Read<int>((IntPtr)LR2value.baseaddr + 0x21f44, false), Encoding.GetEncoding(932), false);
-                LR2value.music_genre = sharp.ReadString((IntPtr)sharp.Read<int>((IntPtr)LR2value.baseaddr + 0x21f2c, false), Encoding.GetEncoding(932), false);
-                LR2value.music_artist = sharp.ReadString((IntPtr)sharp.Read<int>((IntPtr)LR2value.baseaddr + 0x21f30, false), Encoding.GetEncoding(932), false);
-                LR2value.music_artist2 = sharp.ReadString((IntPtr)sharp.Read<int>((IntPtr)LR2value.baseaddr + 0x21f34, false), Encoding.GetEncoding(932), false);
-                LR2value.clear_type = sharp.Read<int>((IntPtr)LR2value.baseaddr + 0x97b88, false);
-                LR2value.gauge_type = sharp.Read<int>((IntPtr)LR2value.baseaddr + 0x8, false);
+                getLR2value();
 
                 var level = "";
                 if (Convert.ToInt16(LR2value.music_diff_level) > 0) {
@@ -100,9 +93,10 @@ namespace LR2Helper_GV {
                 replace_list["#MUSIC_GENRE#"] = LR2value.music_genre;
                 replace_list["#MUSIC_ARTIST#"] = LR2value.music_artist;
                 replace_list["#MUSIC_ARTIST2#"] = LR2value.music_artist2;
-                replace_list["#CLEAR_TYPE#"] = LR2value.str_clear_type[LR2value.clear_type];
-                replace_list["#GAUGE_TYPE#"] = LR2value.str_gauge_type[LR2value.gauge_type];
-
+                replace_list["#CLEAR_TYPE#"] = LR2value.str_clear_type[LR2value.play_clear_type];
+                replace_list["#GAUGE_TYPE#"] = LR2value.str_gauge_type[LR2value.play_gauge_type];
+                replace_list["#DJ_LEVEL#"] = LR2value.str_djlevel[LR2value.play_djlevel];
+                initSimpleresult();
 
                 String tweet_text = text;
                 foreach (var replace_key in replace_list.Keys) {
@@ -112,21 +106,19 @@ namespace LR2Helper_GV {
             }
             LR2value.scene = now_scene;
 
-
-
         }
         private void setTweettext(string text) {
             if (this.textBoxTweettext.InvokeRequired) {
                 SetTextCallback d = new SetTextCallback(setTweettext);
                 this.Invoke(d, new object[] { text });
             } else {
-               
+
                 this.textBoxTweettext.Text = text;
             }
         }
         private void sendTweet(string text) {
             String window_title = getActiveWindowTitle();
-            if ((authenticatedUser != null) && (LR2value.scene == 5) && (window_title == "LR2 beta3 version 100201")) {
+            if ((authenticatedUser != null) && (LR2value.scene == 5) && (window_title == sharp.Windows.MainWindow.Title)) {
                 if (text.Length < 140) {
                     var window = sharp.Windows.MainWindow;
                     keybd_event((byte)Keys.F6, 0x00, 0x00, 0);
@@ -135,10 +127,49 @@ namespace LR2Helper_GV {
                     delay(1000);
                     var file = Directory.GetFiles(@process_path, "LR2 *.png").Last();
                     var image = File.ReadAllBytes(file);
-                    var media = Upload.UploadImage(image);
-                    var tweet = Tweet.PublishTweet(text, new PublishTweetOptionalParameters {
-                        Medias = { media }
-                    });
+
+                    //업로드 모드에 따라 
+                    // 0 - 기본값, (혹은 1~3 이외의 값) : 둘 다 올린다. 심플 리절트를 먼저 올린다.
+                    // 1 - 둘 다 올린다. 노멀 리절트를 먼저 올린다.
+                    // 2 - 심플 리절트만 올린다.
+                    // 3 - 노멀 리절트만 올린다.
+                    // 4 - 이미지를 올리지 않는다.
+                    IMedia media;
+                    IMedia media2;
+                    ITweet tweet;
+
+                    switch (tweet_upload_mode) {
+                        case 4:
+                            tweet = Tweet.PublishTweet(text);
+                            break;
+                        case 3:
+                            media = Upload.UploadImage(image);
+                            tweet = Tweet.PublishTweet(text, new PublishTweetOptionalParameters {
+                                Medias = { media }
+                            });
+                            break;
+                        case 2:
+                            media = Upload.UploadImage(ImageToByteArray(pictureBoxSimpleresult.Image));
+                            tweet = Tweet.PublishTweet(text, new PublishTweetOptionalParameters {
+                                Medias = { media }
+                            });
+                            break;
+                        case 1:
+                            media = Upload.UploadImage(image);
+                            media2 = Upload.UploadImage(ImageToByteArray(pictureBoxSimpleresult.Image));
+                            tweet = Tweet.PublishTweet(text, new PublishTweetOptionalParameters {
+                                Medias = { media, media2 }
+                            });
+                            break;
+                        default:
+                            media = Upload.UploadImage(image);
+                            media2 = Upload.UploadImage(ImageToByteArray(pictureBoxSimpleresult.Image));
+                            tweet = Tweet.PublishTweet(text, new PublishTweetOptionalParameters {
+                                Medias = { media2, media }
+                            });
+                            break;
+                    }
+
                     if (tweet != null) {
                         toolStripStatusLabel1.Text = "Tweet succeeded";
                     } else {
@@ -157,6 +188,8 @@ namespace LR2Helper_GV {
                     var file = Directory.GetFiles(@process_path, "*.png").Last();
                     var image = File.ReadAllBytes(file);
                     var media = Upload.UploadImage(image);
+
+                    //var media = Upload.UploadImage(ImageToByteArray(pictureBoxSimpleresult.Image));
                     var tweet = Tweet.PublishTweet(this.textBoxTweettext.Text, new PublishTweetOptionalParameters {
                         Medias = { media }
                     });
@@ -178,9 +211,15 @@ namespace LR2Helper_GV {
                 if (id == 0) {
                     sendTweet(this.textBoxTweettext.Text);
                 } else if (id == 1) {
-                    getSongstatus(tweet_template_sub,1);
+                    getSongstatus(tweet_template_sub, 1);
                     sendTweet(this.textBoxTweettext.Text);
                 }
+            }
+        }
+        public byte[] ImageToByteArray(System.Drawing.Image imageIn) {
+            using (var ms = new MemoryStream()) {
+                imageIn.Save(ms, System.Drawing.Imaging.ImageFormat.Png);
+                return ms.ToArray();
             }
         }
         private static DateTime delay(int MS) {

@@ -41,16 +41,20 @@
             this.labelDSTYtemplate = new System.Windows.Forms.Label();
             this.labelDSTX = new System.Windows.Forms.Label();
             this.tabPage2 = new System.Windows.Forms.TabPage();
+            this.labelHotkeyhelp = new System.Windows.Forms.Label();
+            this.buttonTweetsend = new System.Windows.Forms.Button();
             this.textBoxTweettext = new System.Windows.Forms.TextBox();
             this.textBoxTwittertoken = new System.Windows.Forms.TextBox();
             this.buttonGettwittertoken = new System.Windows.Forms.Button();
             this.buttonOpentwittertoken = new System.Windows.Forms.Button();
-            this.labelHotkeyhelp = new System.Windows.Forms.Label();
-            this.buttonTweetsend = new System.Windows.Forms.Button();
+            this.tabPage3 = new System.Windows.Forms.TabPage();
+            this.pictureBoxSimpleresult = new System.Windows.Forms.PictureBox();
             this.statusStrip1.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.tabPage2.SuspendLayout();
+            this.tabPage3.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxSimpleresult)).BeginInit();
             this.SuspendLayout();
             // 
             // statusStrip1
@@ -59,7 +63,7 @@
             this.toolStripStatusLabel1});
             this.statusStrip1.Location = new System.Drawing.Point(0, 120);
             this.statusStrip1.Name = "statusStrip1";
-            this.statusStrip1.Size = new System.Drawing.Size(397, 22);
+            this.statusStrip1.Size = new System.Drawing.Size(407, 22);
             this.statusStrip1.TabIndex = 1;
             this.statusStrip1.Tag = "";
             this.statusStrip1.Text = "statusStrip1";
@@ -74,11 +78,14 @@
             // 
             this.tabControl1.Controls.Add(this.tabPage1);
             this.tabControl1.Controls.Add(this.tabPage2);
+            this.tabControl1.Controls.Add(this.tabPage3);
             this.tabControl1.Location = new System.Drawing.Point(0, 1);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(397, 118);
+            this.tabControl1.Size = new System.Drawing.Size(410, 120);
             this.tabControl1.TabIndex = 8;
+            this.tabControl1.Selected += new System.Windows.Forms.TabControlEventHandler(this.tabControl1_Selected);
+            this.tabControl1.TabIndexChanged += new System.EventHandler(this.tabControl1_TabIndexChanged);
             // 
             // tabPage1
             // 
@@ -92,7 +99,7 @@
             this.tabPage1.Location = new System.Drawing.Point(4, 22);
             this.tabPage1.Name = "tabPage1";
             this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage1.Size = new System.Drawing.Size(389, 92);
+            this.tabPage1.Size = new System.Drawing.Size(402, 94);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "Green Number";
             this.tabPage1.UseVisualStyleBackColor = true;
@@ -178,72 +185,90 @@
             this.tabPage2.Location = new System.Drawing.Point(4, 22);
             this.tabPage2.Name = "tabPage2";
             this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage2.Size = new System.Drawing.Size(389, 92);
+            this.tabPage2.Size = new System.Drawing.Size(402, 94);
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "Twitter";
             this.tabPage2.UseVisualStyleBackColor = true;
             // 
+            // labelHotkeyhelp
+            // 
+            this.labelHotkeyhelp.AutoSize = true;
+            this.labelHotkeyhelp.Location = new System.Drawing.Point(189, 46);
+            this.labelHotkeyhelp.Name = "labelHotkeyhelp";
+            this.labelHotkeyhelp.Size = new System.Drawing.Size(176, 12);
+            this.labelHotkeyhelp.TabIndex = 26;
+            this.labelHotkeyhelp.Text = "Tweet upload : F11 (on result)";
+            // 
+            // buttonTweetsend
+            // 
+            this.buttonTweetsend.Enabled = false;
+            this.buttonTweetsend.Location = new System.Drawing.Point(343, 64);
+            this.buttonTweetsend.Name = "buttonTweetsend";
+            this.buttonTweetsend.Size = new System.Drawing.Size(41, 23);
+            this.buttonTweetsend.TabIndex = 25;
+            this.buttonTweetsend.Text = "▶";
+            this.buttonTweetsend.UseVisualStyleBackColor = true;
+            // 
             // textBoxTweettext
             // 
-            this.textBoxTweettext.Location = new System.Drawing.Point(8, 65);
+            this.textBoxTweettext.Location = new System.Drawing.Point(9, 65);
             this.textBoxTweettext.Name = "textBoxTweettext";
             this.textBoxTweettext.Size = new System.Drawing.Size(330, 21);
-            this.textBoxTweettext.TabIndex = 3;
+            this.textBoxTweettext.TabIndex = 24;
             // 
             // textBoxTwittertoken
             // 
-            this.textBoxTwittertoken.Location = new System.Drawing.Point(8, 40);
+            this.textBoxTwittertoken.Location = new System.Drawing.Point(9, 40);
             this.textBoxTwittertoken.Name = "textBoxTwittertoken";
             this.textBoxTwittertoken.Size = new System.Drawing.Size(97, 21);
-            this.textBoxTwittertoken.TabIndex = 2;
+            this.textBoxTwittertoken.TabIndex = 23;
             // 
             // buttonGettwittertoken
             // 
             this.buttonGettwittertoken.Enabled = false;
-            this.buttonGettwittertoken.Location = new System.Drawing.Point(109, 39);
+            this.buttonGettwittertoken.Location = new System.Drawing.Point(110, 39);
             this.buttonGettwittertoken.Name = "buttonGettwittertoken";
             this.buttonGettwittertoken.Size = new System.Drawing.Size(77, 23);
-            this.buttonGettwittertoken.TabIndex = 1;
+            this.buttonGettwittertoken.TabIndex = 22;
             this.buttonGettwittertoken.Text = "Enter";
             this.buttonGettwittertoken.UseVisualStyleBackColor = true;
             this.buttonGettwittertoken.Click += new System.EventHandler(this.buttonGettoken_Click);
             // 
             // buttonOpentwittertoken
             // 
-            this.buttonOpentwittertoken.Location = new System.Drawing.Point(7, 6);
+            this.buttonOpentwittertoken.Location = new System.Drawing.Point(8, 6);
             this.buttonOpentwittertoken.Name = "buttonOpentwittertoken";
             this.buttonOpentwittertoken.Size = new System.Drawing.Size(179, 31);
-            this.buttonOpentwittertoken.TabIndex = 0;
+            this.buttonOpentwittertoken.TabIndex = 21;
             this.buttonOpentwittertoken.Text = "Twitter Login";
             this.buttonOpentwittertoken.UseVisualStyleBackColor = true;
             this.buttonOpentwittertoken.Click += new System.EventHandler(this.buttonOpentwittertoken_Click);
             // 
-            // labelHotkeyhelp
+            // tabPage3
             // 
-            this.labelHotkeyhelp.AutoSize = true;
-            this.labelHotkeyhelp.Location = new System.Drawing.Point(188, 46);
-            this.labelHotkeyhelp.Name = "labelHotkeyhelp";
-            this.labelHotkeyhelp.Size = new System.Drawing.Size(176, 12);
-            this.labelHotkeyhelp.TabIndex = 5;
-            this.labelHotkeyhelp.Text = "Tweet upload : F11 (on result)";
+            this.tabPage3.Controls.Add(this.pictureBoxSimpleresult);
+            this.tabPage3.Location = new System.Drawing.Point(4, 22);
+            this.tabPage3.Name = "tabPage3";
+            this.tabPage3.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage3.Size = new System.Drawing.Size(402, 94);
+            this.tabPage3.TabIndex = 2;
+            this.tabPage3.Text = "Simple Result";
+            this.tabPage3.UseVisualStyleBackColor = true;
             // 
-            // buttonTweetsend
+            // pictureBoxSimpleresult
             // 
-            this.buttonTweetsend.Enabled = false;
-            this.buttonTweetsend.Location = new System.Drawing.Point(342, 64);
-            this.buttonTweetsend.Name = "buttonTweetsend";
-            this.buttonTweetsend.Size = new System.Drawing.Size(41, 23);
-            this.buttonTweetsend.TabIndex = 4;
-            this.buttonTweetsend.Text = "▶";
-            this.buttonTweetsend.UseVisualStyleBackColor = true;
-            this.buttonTweetsend.Click += new System.EventHandler(this.buttonTweetsend_Click);
+            this.pictureBoxSimpleresult.Location = new System.Drawing.Point(0, 3);
+            this.pictureBoxSimpleresult.Name = "pictureBoxSimpleresult";
+            this.pictureBoxSimpleresult.Size = new System.Drawing.Size(400, 600);
+            this.pictureBoxSimpleresult.TabIndex = 0;
+            this.pictureBoxSimpleresult.TabStop = false;
             // 
             // mainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.Control;
-            this.ClientSize = new System.Drawing.Size(397, 142);
+            this.ClientSize = new System.Drawing.Size(407, 142);
             this.Controls.Add(this.tabControl1);
             this.Controls.Add(this.statusStrip1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
@@ -258,6 +283,8 @@
             this.tabPage1.PerformLayout();
             this.tabPage2.ResumeLayout(false);
             this.tabPage2.PerformLayout();
+            this.tabPage3.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxSimpleresult)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -277,12 +304,14 @@
         private System.Windows.Forms.Label labelDSTYtemplate;
         private System.Windows.Forms.Label labelDSTX;
         private System.Windows.Forms.TabPage tabPage2;
-        private System.Windows.Forms.Button buttonOpentwittertoken;
-        private System.Windows.Forms.TextBox textBoxTwittertoken;
-        private System.Windows.Forms.Button buttonGettwittertoken;
-        private System.Windows.Forms.TextBox textBoxTweettext;
         private System.Windows.Forms.Label labelHotkeyhelp;
         private System.Windows.Forms.Button buttonTweetsend;
+        private System.Windows.Forms.TextBox textBoxTweettext;
+        private System.Windows.Forms.TextBox textBoxTwittertoken;
+        private System.Windows.Forms.Button buttonGettwittertoken;
+        private System.Windows.Forms.Button buttonOpentwittertoken;
+        private System.Windows.Forms.TabPage tabPage3;
+        private System.Windows.Forms.PictureBox pictureBoxSimpleresult;
     }
 }
 
