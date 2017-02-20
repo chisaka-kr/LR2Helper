@@ -69,10 +69,9 @@ namespace LR2Helper_GV {
 
             }
         }
-        public void getSongstatus(string text, int flag) {
-
+        public void getSongstatus(string text) {
             var now_scene = sharp.Read<int>((IntPtr)LR2value.baseaddr + 0x23db4, false);
-            if (((now_scene != LR2value.scene) && (now_scene == 5)) || ((now_scene == 5) && (flag == 1))) { //리절트 화면에 진입했을 경우
+            if (now_scene == 5) {
                 delay(500); // 진입 후 500ms만 기다린다 (NO PLAY라고 뜨는 걸 막기위해)
 
                 getLR2value();
@@ -103,8 +102,6 @@ namespace LR2Helper_GV {
                 }
                 setTweettext(tweet_text);
             }
-            LR2value.scene = now_scene;
-
         }
         private void setTweettext(string text) {
             if (this.textBoxTweettext.InvokeRequired) {
@@ -210,7 +207,7 @@ namespace LR2Helper_GV {
                 if (id == 0) {
                     sendTweet(this.textBoxTweettext.Text);
                 } else if (id == 1) {
-                    getSongstatus(tweet_template_sub, 1);
+                    getSongstatus(tweet_template_sub);
                     sendTweet(this.textBoxTweettext.Text);
                 }
             }

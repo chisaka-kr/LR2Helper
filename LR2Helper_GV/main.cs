@@ -22,7 +22,7 @@ using Tweetinvi.Models;
 namespace LR2Helper_GV {
     public partial class mainForm : Form {
         static string prog_version = "L2.0.3";
-        static string prog_build = "170220:1 release";
+        static string prog_build = "170221:0 alpha";
 
         IntPtr prog_baseaddr; // 보통 0x400000;
         IntPtr vmem_getbaseaddr_asm; // base address를 빼올 코드 
@@ -254,25 +254,31 @@ namespace LR2Helper_GV {
             initGreenvalue();
 
             while (true) {
-                try {
-                    if (LR2value.baseaddr > 0) {
-                        getGreenvalue();
+                if (LR2value.baseaddr > 0) {
+                    var now_scene = sharp.Read<int>((IntPtr)LR2value.baseaddr + 0x23db4, false);
+                    try {
+                        if (now_scene == 4) {
+                            getGreenvalue();
+                        }
+                    } catch (Exception e) {
+                        toolStripStatusLabel1.Text = "Critical error occured. Please restart LR2Helper.";
+                        writeLog(e.ToString());
                     }
-                } catch (Exception e) {
-                    toolStripStatusLabel1.Text = "Critical error occured. Please restart LR2Helper.";
-                    writeLog(e.ToString());
-                }
-                try {
-                    if (LR2value.baseaddr > 0) {
-                        getSongstatus(this.tweet_template, 0);
+                    try {
+                        if ((now_scene != LR2value.scene) && (now_scene == 5)) { //리절트 화면에 진입했을 경우
+                            getSongstatus(this.tweet_template);
+                        }
+                        LR2value.scene = now_scene;
+                    } catch (Exception e) {
+                        writeLog(e.ToString());
                     }
-                } catch (Exception e) {
-                    writeLog(e.ToString());
+                    if (flag_interrupt == 1) {
+                        break;
+                    }
+                    Thread.Sleep(16);
+                } else {
+                    Thread.Sleep(1000);
                 }
-                if (flag_interrupt == 1) {
-                    break;
-                }
-                Thread.Sleep(16);
             }
         }
         private void getXML() {
@@ -321,6 +327,11 @@ namespace LR2Helper_GV {
                                 case "tweet_template":
                                     if (setting_root.Read()) {
                                         tweet_template = setting_root.Value.Trim();
+                                    }
+                                    break;
+                                case "tweet_template_sub":
+                                    if (setting_root.Read()) {
+                                        tweet_template_sub = setting_root.Value.Trim();
                                     }
                                     break;
                                 case "debug_mode":
