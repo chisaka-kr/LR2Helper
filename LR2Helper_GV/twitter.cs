@@ -47,7 +47,6 @@ namespace LR2Helper_GV {
                     authenticatedUser = User.GetAuthenticatedUser();
 
                     if (authenticatedUser != null) {
-                        flag_twitterlogon = 1;
                         buttonGettwittertoken.Enabled = false;
                         buttonOpentwittertoken.Enabled = false;
                         textBoxTwittertoken.Enabled = false;

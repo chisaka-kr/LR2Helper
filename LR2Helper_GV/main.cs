@@ -22,7 +22,7 @@ using Tweetinvi.Models;
 namespace LR2Helper_GV {
     public partial class mainForm : Form {
         static string prog_version = "L2.0.3";
-        static string prog_build = "170220:0 alpha";
+        static string prog_build = "170220:1 release";
 
         IntPtr prog_baseaddr; // 보통 0x400000;
         IntPtr vmem_getbaseaddr_asm; // base address를 빼올 코드 
@@ -32,13 +32,12 @@ namespace LR2Helper_GV {
 
         ushort flag_interrupt = 0;
         ushort flag_unsupportedskinmode = 0;
-        ushort flag_twitterlogon = 0;
         ushort flag_resolution_manual_mode = 0;
         ushort flag_debug = 0;
 
         string process_name;
         string process_path;
-        string[] screenshot_files;
+
 
         MemorySharp sharp;
         LR2value LR2value = new LR2value();
@@ -205,11 +204,10 @@ namespace LR2Helper_GV {
                         break;
                     }
                 } catch (Exception e) {
-                    for (uint i = 0; i < 5; i++) {
-                        //뭔지 모를 에러가 났지만 그래도 재시도
-                        toolStripStatusLabel1.Text = "Unexpected error occured. Try to reattach in " + (5 - i) + "s";
-                        Thread.Sleep(1000);
-                    }
+                       //뭔지 모를 에러가 났지만 그래도 재시도
+                        toolStripStatusLabel1.Text = "Attach process failed..";
+                        writeLog(e.ToString());
+                    break;
                 }
             }
 
@@ -458,7 +456,7 @@ namespace LR2Helper_GV {
                     setting_make.WriteElementString("auth_secret", "");
                     setting_make.WriteElementString("tweet_template", "#MUSIC_NAME# (#MUSIC_DIFF_LEVEL#)を#CLEAR_TYPE#しました!");
                     setting_make.WriteElementString("tweet_template_sub", "@null #MUSIC_NAME# (#MUSIC_DIFF_LEVEL#)を#CLEAR_TYPE#しました!");
-                    setting_make.WriteElementString("upload_mode","0");
+                    setting_make.WriteElementString("upload_mode", "0");
                     setting_make.WriteEndElement();
 
                     setting_make.WriteEndElement();
@@ -533,9 +531,9 @@ namespace LR2Helper_GV {
             LR2value.play_score = LR2value.play_pgreat * 2 + LR2value.play_great;
 
             if (LR2value.play_djlevel > 8) {
-                LR2value.play_djlevel = (LR2value.play_score*100/(LR2value.play_maximum_combo*2))/11;
+                LR2value.play_djlevel = (LR2value.play_score * 100 / (LR2value.play_maximum_combo * 2)) / 11;
             }
-            
+
         }
 
         //다양한 이벤트들
@@ -599,7 +597,6 @@ namespace LR2Helper_GV {
                     Auth.SetCredentials(userCredentials);
                     authenticatedUser = User.GetAuthenticatedUser();
                     if (Convert.ToInt64(authenticatedUser.IdStr) > 0) {
-                        flag_twitterlogon = 1;
                         buttonGettwittertoken.Enabled = false;
                         buttonOpentwittertoken.Enabled = false;
                         textBoxTwittertoken.Enabled = false;
