@@ -22,7 +22,7 @@ using Tweetinvi.Models;
 namespace LR2Helper_GV {
     public partial class mainForm : Form {
         static string prog_version = "L2.0.3";
-        static string prog_build = "170221:0 alpha";
+        static string prog_build = "170221:0 release";
 
         IntPtr prog_baseaddr; // 보통 0x400000;
         IntPtr vmem_getbaseaddr_asm; // base address를 빼올 코드 
