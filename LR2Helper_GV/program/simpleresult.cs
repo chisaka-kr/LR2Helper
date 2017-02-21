@@ -26,7 +26,6 @@ namespace LR2Helper_GV {
 
         public void initSimpleresult() {
 
-
             string image_name = "clear";
 
             //클리어했는지, 풀콤했는지 확인

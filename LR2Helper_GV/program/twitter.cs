@@ -52,6 +52,7 @@ namespace LR2Helper_GV {
                         textBoxTwittertoken.Enabled = false;
                         //buttonTweetsend.Enabled = true;
                         buttonOpentwittertoken.Text = "Already logged in";
+                        textBoxTwittertoken.Text = "@"+authenticatedUser.ScreenName;
                     }
                     /*
                     var sendTweet = authenticatedUser.PublishTweet("★6 Engine [Insane]をハードクリアしました。");
@@ -114,15 +115,12 @@ namespace LR2Helper_GV {
         }
         private void sendTweet(string text) {
             String window_title = getActiveWindowTitle();
+            if (flag_already_tweeted == 1) {
+                toolStripStatusLabel1.Text = "Already tweeted";
+            }
             if ((authenticatedUser != null) && (LR2value.scene == 5) && (window_title == sharp.Windows.MainWindow.Title)) {
                 if (text.Length < 140) {
                     var window = sharp.Windows.MainWindow;
-                    keybd_event((byte)Keys.F6, 0x00, 0x00, 0);
-                    delay(200);
-                    keybd_event((byte)Keys.F6, 0x00, 0x02, 0);
-                    delay(1000);
-                    var file = Directory.GetFiles(@process_path, "LR2 *.png").Last();
-                    var image = File.ReadAllBytes(file);
 
                     //업로드 모드에 따라 
                     // 0 - 기본값, (혹은 1~3 이외의 값) : 둘 다 올린다. 심플 리절트를 먼저 올린다.
@@ -133,6 +131,18 @@ namespace LR2Helper_GV {
                     IMedia media;
                     IMedia media2;
                     ITweet tweet;
+                    if (flag_already_screenshoted == 0) { //스크린샷을 안찍었다면
+                        if (!((tweet_upload_mode == 4) || (tweet_upload_mode == 2))) {
+                            flag_already_screenshoted = 1;
+                            keybd_event((byte)Keys.F6, 0x00, 0x00, 0);
+                            delay(200);
+                            keybd_event((byte)Keys.F6, 0x00, 0x02, 0);
+                            delay(1000);
+
+                        }
+                    }
+                    var file = Directory.GetFiles(@process_path, "LR2 *.png").Last();
+                    var image = File.ReadAllBytes(file);
 
                     switch (tweet_upload_mode) {
                         case 4:
@@ -168,6 +178,7 @@ namespace LR2Helper_GV {
 
                     if (tweet != null) {
                         toolStripStatusLabel1.Text = "Tweet succeeded";
+                        flag_already_tweeted = 1;
                     } else {
                         toolStripStatusLabel1.Text = "Tweet failed";
                     }
@@ -194,21 +205,6 @@ namespace LR2Helper_GV {
                     } else {
                         toolStripStatusLabel1.Text = "Tweet failed";
                     }
-                }
-            }
-        }
-        protected override void WndProc(ref System.Windows.Forms.Message m) {
-            base.WndProc(ref m);
-
-            if (m.Msg == 0x0312) {
-                Keys key = (Keys)(((int)m.LParam >> 16) & 0xFFFF);                  // The key of the hotkey that was pressed.
-                KeyModifier modifier = (KeyModifier)((int)m.LParam & 0xFFFF);       // The modifier of the hotkey that was pressed.
-                int id = m.WParam.ToInt32();                                        // The id of the hotkey that was pressed.
-                if (id == 0) {
-                    sendTweet(this.textBoxTweettext.Text);
-                } else if (id == 1) {
-                    getSongstatus(tweet_template_sub);
-                    sendTweet(this.textBoxTweettext.Text);
                 }
             }
         }

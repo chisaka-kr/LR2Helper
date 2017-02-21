@@ -105,24 +105,6 @@ namespace LR2Helper_GV {
                 LR2value.cal_bpm = (int)LR2value.bpm;
             }
 
-            if (textBoxDSTY.Text != null) { //isnumber로 바꾸는게 나을까?
-                try {
-                    if (LR2value.dst_y != Int32.Parse(textBoxDSTY.Text)) {
-                        LR2value.dst_y = Int32.Parse(textBoxDSTY.Text);
-                    }
-                } catch (Exception) { }
-            } else {
-                LR2value.dst_y = 482;
-            }
-            if (textBoxDSTX.Text != null) {
-                try {
-                    if (LR2value.dst_x != Int32.Parse(textBoxDSTX.Text)) {
-                        LR2value.dst_x = Int32.Parse(textBoxDSTX.Text);
-                    }
-                } catch (Exception) { }
-            } else {
-                LR2value.dst_x = 288;
-            }
             if (LR2value.cal_bpm == 0) {
                 LR2value.cal_bpm = 150;
             }
@@ -143,14 +125,6 @@ namespace LR2Helper_GV {
             //unsupported skin mode가 on이면 fps에 녹숫을 덮어씌운다
             if (flag_unsupportedskinmode == 1) {
                 sharp.Write<double>((IntPtr)(LR2value.baseaddr + 0x20E08), Convert.ToInt32(LR2value.green_number), false);
-            }
-
-            if (!sharp.IsRunning) //LR2 프로세스 체크
-            {
-                Thread th_initFirstprocess = new Thread(new ThreadStart(initFirstprocess));
-                toolStripStatusLabel1.Text = "LR2 process is terminated!";
-                Thread.Sleep(2000);
-                th_initFirstprocess.Start();
             }
         }
     }

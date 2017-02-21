@@ -21,7 +21,7 @@ using Tweetinvi.Models;
 
 namespace LR2Helper_GV {
     public partial class mainForm : Form {
-        static string prog_version = "L2.0.3";
+        static string prog_version = "L2.0.4";
         static string prog_build = "170221:0 release";
 
         IntPtr prog_baseaddr; // 보통 0x400000;
@@ -34,7 +34,9 @@ namespace LR2Helper_GV {
         ushort flag_unsupportedskinmode = 0;
         ushort flag_resolution_manual_mode = 0;
         ushort flag_debug = 0;
-
+        ushort flag_already_tweeted = 0;
+        ushort flag_already_screenshoted = 0;
+        ushort flag_run_rename = 0;
         string process_name;
         string process_path;
 
@@ -91,6 +93,7 @@ namespace LR2Helper_GV {
             comboBoxDSTtemplate.DataSource = new BindingSource(skin_template_dsty, null);
 
             getTwitterid();
+            InitRenameScreenshot();
 
             this.Text = "LR2Helper" + prog_version + " [build:" + prog_build + "]";
             buttonUnsupportskinmode.Enabled = true;
@@ -109,12 +112,6 @@ namespace LR2Helper_GV {
                 try {
                     //ini로 설정 저장. 사용하지 않음
                     //WritePrivateProfileString("setting", "DSTY", textBoxDSTY.Text.ToString(), iniPath);
-                    //xml로 설정 저장
-                    XmlDocument setting_update = new XmlDocument();
-                    setting_update.Load(@setting_path);
-                    setting_update.GetElementsByTagName("dst_y")[0].InnerText = textBoxDSTY.Text;
-                    setting_update.GetElementsByTagName("dst_x")[0].InnerText = textBoxDSTX.Text;
-                    setting_update.Save(@setting_path);
                     Process[] process_id = Process.GetProcessesByName("");
 
                     String[] process_name_list = {
@@ -204,9 +201,9 @@ namespace LR2Helper_GV {
                         break;
                     }
                 } catch (Exception e) {
-                       //뭔지 모를 에러가 났지만 그래도 재시도
-                        toolStripStatusLabel1.Text = "Attach process failed..";
-                        writeLog(e.ToString());
+                    //뭔지 모를 에러가 났지만 그래도 재시도
+                    toolStripStatusLabel1.Text = "Attach process failed..";
+                    writeLog(e.ToString());
                     break;
                 }
             }
@@ -252,20 +249,54 @@ namespace LR2Helper_GV {
         }
         public void startWork() { // 모든 리프레시 작업은 여기서 (스레드를 나눌 필요가 있으면 다른 방법으로)
             initGreenvalue();
-
+            int now_scene;
             while (true) {
                 if (LR2value.baseaddr > 0) {
-                    var now_scene = sharp.Read<int>((IntPtr)LR2value.baseaddr + 0x23db4, false);
+                    
                     try {
+                        now_scene = sharp.Read<int>((IntPtr)LR2value.baseaddr + 0x23db4, false);
+
+                        int dst_x;
+                        int dst_y;
+
+                        if (!int.TryParse(textBoxDSTX.Text,out dst_x)) {
+                            dst_x = 288;
+                        }
+
+                        if (!int.TryParse(textBoxDSTY.Text, out dst_y)) {
+                            dst_y = 482;
+                        }
+
+                        //xml로 설정 저장. 
+                        if ((LR2value.dst_x != dst_x) || (LR2value.dst_y != dst_y)) {
+                            XmlDocument setting_update = new XmlDocument();
+                            setting_update.Load(@setting_path);
+                            setting_update.GetElementsByTagName("dst_x")[0].InnerText = dst_x.ToString();
+                            setting_update.GetElementsByTagName("dst_y")[0].InnerText = dst_y.ToString();
+                            LR2value.dst_x = dst_x;
+                            LR2value.dst_y = dst_y;
+
+                            setting_update.Save(@setting_path);
+                        }
+
                         if (now_scene == 4) {
                             getGreenvalue();
                         }
                     } catch (Exception e) {
                         toolStripStatusLabel1.Text = "Critical error occured. Please restart LR2Helper.";
+                        Thread.Sleep(1000);
                         writeLog(e.ToString());
+                        toolStripStatusLabel1.Text = "";
                     }
                     try {
-                        if ((now_scene != LR2value.scene) && (now_scene == 5)) { //리절트 화면에 진입했을 경우
+                        now_scene = sharp.Read<int>((IntPtr)LR2value.baseaddr + 0x23db4, false);
+                        if ((now_scene == 2) && (flag_run_rename == 1)) {
+                            RunRenameScreenshot(); //스크린샷을 옮긴다
+                        }
+                        if ((now_scene == 5) && (now_scene != LR2value.scene)) { //리절트 화면에 진입했을 경우
+                            flag_already_tweeted = 0; //플래그 초기화
+                            flag_already_screenshoted = 0; //플래그 초기화
+
                             getSongstatus(this.tweet_template);
                         }
                         LR2value.scene = now_scene;
@@ -273,6 +304,13 @@ namespace LR2Helper_GV {
                         writeLog(e.ToString());
                     }
                     if (flag_interrupt == 1) {
+                        break;
+                    }
+                    if (!sharp.IsRunning) //LR2 프로세스 체크
+{                        Thread th_initFirstprocess = new Thread(new ThreadStart(initFirstprocess));
+                        toolStripStatusLabel1.Text = "LR2 process is terminated!";
+                        Thread.Sleep(2000);
+                        th_initFirstprocess.Start();
                         break;
                     }
                     Thread.Sleep(16);
@@ -301,27 +339,27 @@ namespace LR2Helper_GV {
                             switch (setting_root.Name) {
                                 case "resolution_manual_mode":
                                     if (setting_root.Read()) {
-                                        flag_resolution_manual_mode = Convert.ToUInt16(setting_root.Value.Trim());
+                                        ushort.TryParse(setting_root.Value.Trim(),out flag_resolution_manual_mode);
                                     }
                                     break;
                                 case "resolution_height":
                                     if (setting_root.Read()) {
-                                        LR2value.resolution_height = Convert.ToUInt16(setting_root.Value.Trim());
+                                        int.TryParse(setting_root.Value.Trim(), out LR2value.resolution_height);
                                     }
                                     break;
                                 case "resolution_width":
                                     if (setting_root.Read()) {
-                                        LR2value.resolution_width = Convert.ToUInt16(setting_root.Value.Trim());
+                                        int.TryParse(setting_root.Value.Trim(), out LR2value.resolution_width);
                                     }
                                     break;
                                 case "monitor_height":
                                     if (setting_root.Read()) {
-                                        LR2value.window_height = Convert.ToUInt16(setting_root.Value.Trim());
+                                        int.TryParse(setting_root.Value.Trim(), out LR2value.window_height);
                                     }
                                     break;
                                 case "monitor_width":
                                     if (setting_root.Read()) {
-                                        LR2value.window_width = Convert.ToUInt16(setting_root.Value.Trim());
+                                        int.TryParse(setting_root.Value.Trim(), out LR2value.window_width);
                                     }
                                     break;
                                 case "tweet_template":
@@ -336,7 +374,7 @@ namespace LR2Helper_GV {
                                     break;
                                 case "debug_mode":
                                     if (setting_root.Read()) {
-                                        flag_debug = Convert.ToUInt16(setting_root.Value.Trim());
+                                        ushort.TryParse(setting_root.Value.Trim(), out flag_debug);
                                     }
                                     break;
                                 case "dst_x":
@@ -369,7 +407,22 @@ namespace LR2Helper_GV {
                                     break;
                                 case "tweet_upload_mode":
                                     if (setting_root.Read()) {
-                                        tweet_upload_mode = Convert.ToInt16(setting_root.Value.Trim());
+                                        int.TryParse(setting_root.Value.Trim(), out tweet_upload_mode);
+                                    }
+                                    break;
+                                case "rename_template":
+                                    if (setting_root.Read()) {
+                                        rename_template = setting_root.Value.Trim();
+                                    }
+                                    break;
+                                case "simple_rename_template":
+                                    if (setting_root.Read()) {
+                                        simple_rename_template = setting_root.Value.Trim();
+                                    }
+                                    break;
+                                case "screenshot_save_mode":
+                                    if (setting_root.Read()) {
+                                        int.TryParse(setting_root.Value.Trim(), out screenshot_save_mode);
                                     }
                                     break;
                             }
@@ -467,7 +520,13 @@ namespace LR2Helper_GV {
                     setting_make.WriteElementString("auth_secret", "");
                     setting_make.WriteElementString("tweet_template", "#MUSIC_NAME# (#MUSIC_DIFF_LEVEL#)を#CLEAR_TYPE#しました!");
                     setting_make.WriteElementString("tweet_template_sub", "@null #MUSIC_NAME# (#MUSIC_DIFF_LEVEL#)を#CLEAR_TYPE#しました!");
-                    setting_make.WriteElementString("upload_mode", "0");
+                    setting_make.WriteElementString("tweet_upload_mode", "0");
+                    setting_make.WriteEndElement();
+
+                    setting_make.WriteStartElement("screenshot_rename");
+                    setting_make.WriteElementString("rename_template", "[#DATE#-LR2Result] #MUSIC_NAME# (#MUSIC_DIFF_LEVEL#) #CLEAR_TYPE#");
+                    setting_make.WriteElementString("simple_rename_template", "[#DATE#-LR2Simple] #MUSIC_NAME# (#MUSIC_DIFF_LEVEL#) #CLEAR_TYPE#");
+                    setting_make.WriteElementString("screenshot_save_mode", "0");
                     setting_make.WriteEndElement();
 
                     setting_make.WriteEndElement();
@@ -612,8 +671,8 @@ namespace LR2Helper_GV {
                         buttonOpentwittertoken.Enabled = false;
                         textBoxTwittertoken.Enabled = false;
                         //buttonTweetsend.Enabled = true;
-                        textBoxTwittertoken.Text = "";
                         buttonOpentwittertoken.Text = "Login Sucess";
+                        textBoxTwittertoken.Text = "@" + authenticatedUser.ScreenName;
 
                         //세팅값 저장
                         XmlDocument setting_update = new XmlDocument();
@@ -634,19 +693,44 @@ namespace LR2Helper_GV {
         }
 
         private void tabControl1_Selected(object sender, TabControlEventArgs e) {
+            try {
+                if (e.TabPageIndex == 2) {
+                    mainForm.ActiveForm.Width = 423;
+                    mainForm.ActiveForm.Height = 690;
+                    tabControl1.Width = 423;
+                    tabControl1.Height = 630;
+                } else {
+                    mainForm.ActiveForm.Width = 423;
+                    mainForm.ActiveForm.Height = 180;
+                    tabControl1.Width = 423;
+                    tabControl1.Height = 120;
+                }
+            } catch (Exception) {
 
-            if (e.TabPageIndex == 2) {
-                mainForm.ActiveForm.Width = 423;
-                mainForm.ActiveForm.Height = 690;
-                tabControl1.Width = 423;
-                tabControl1.Height = 630;
-            } else {
-                mainForm.ActiveForm.Width = 423;
-                mainForm.ActiveForm.Height = 180;
-                tabControl1.Width = 423;
-                tabControl1.Height = 120;
+            }
+
+        }
+
+        protected override void WndProc(ref System.Windows.Forms.Message m) { // 단축키 등록
+            base.WndProc(ref m);
+
+            if (m.Msg == 0x0312) {
+                Keys key = (Keys)(((int)m.LParam >> 16) & 0xFFFF);                  // The key of the hotkey that was pressed.
+                KeyModifier modifier = (KeyModifier)((int)m.LParam & 0xFFFF);       // The modifier of the hotkey that was pressed.
+                int id = m.WParam.ToInt32();                                        // The id of the hotkey that was pressed.
+                if (id == 0) {
+                    sendTweet(this.textBoxTweettext.Text);
+                } else if (id == 1) {
+                    getSongstatus(tweet_template_sub);
+                    sendTweet(this.textBoxTweettext.Text);
+                } else if (id == 2) {
+                    SetEventRenameScreenshot();
+                } else if (id == 3) {
+                    SetEventRenameScreenshot();
+                }
             }
         }
+
     }
     public class LR2value {
         public int baseaddr = 0;
