@@ -21,8 +21,8 @@ using Tweetinvi.Models;
 
 namespace LR2Helper_GV {
     public partial class mainForm : Form {
-        static string prog_version = "L2.0.4";
-        static string prog_build = "170221:0 release";
+        static string prog_version = "L2.0.5";
+        static string prog_build = "170223:0 alpha";
 
         IntPtr prog_baseaddr; // 보통 0x400000;
         IntPtr vmem_getbaseaddr_asm; // base address를 빼올 코드 
@@ -214,13 +214,19 @@ namespace LR2Helper_GV {
             Thread.Sleep(1500);
 
             toolStripStatusLabel1.Text = "waiting for load music select screen.";
+            int baseaddr = 0;
 
             while (true) {
                 try {
                     //ini로 설정 저장. 사용하지 않음
                     //WritePrivateProfileString("setting", "DSTY", textBoxDSTY.Text.ToString(), setting_path); 
 
-                    int baseaddr = sharp.Read<int>(vmem_getbaseaddr_reg, false);
+                    try {
+                        baseaddr = sharp.Read<int>(vmem_getbaseaddr_reg, false);
+                    } catch (Exception) {
+
+                    }
+
                     if (toolStripStatusLabel1.Text.Length > 50) { toolStripStatusLabel1.Text = "waiting for load music select screen."; }
                     toolStripStatusLabel1.Text += ".";
                     if (baseaddr > 0) {
@@ -244,6 +250,7 @@ namespace LR2Helper_GV {
                     Thread.Sleep(1000);
                 } catch (Exception e) {
                     writeLog(e.ToString());
+                    Thread.Sleep(1000);
                 }
             }
         }
@@ -252,14 +259,14 @@ namespace LR2Helper_GV {
             int now_scene;
             while (true) {
                 if (LR2value.baseaddr > 0) {
-                    
+
                     try {
                         now_scene = sharp.Read<int>((IntPtr)LR2value.baseaddr + 0x23db4, false);
 
                         int dst_x;
                         int dst_y;
 
-                        if (!int.TryParse(textBoxDSTX.Text,out dst_x)) {
+                        if (!int.TryParse(textBoxDSTX.Text, out dst_x)) {
                             dst_x = 288;
                         }
 
@@ -307,7 +314,8 @@ namespace LR2Helper_GV {
                         break;
                     }
                     if (!sharp.IsRunning) //LR2 프로세스 체크
-{                        Thread th_initFirstprocess = new Thread(new ThreadStart(initFirstprocess));
+{
+                        Thread th_initFirstprocess = new Thread(new ThreadStart(initFirstprocess));
                         toolStripStatusLabel1.Text = "LR2 process is terminated!";
                         Thread.Sleep(2000);
                         th_initFirstprocess.Start();
@@ -339,7 +347,7 @@ namespace LR2Helper_GV {
                             switch (setting_root.Name) {
                                 case "resolution_manual_mode":
                                     if (setting_root.Read()) {
-                                        ushort.TryParse(setting_root.Value.Trim(),out flag_resolution_manual_mode);
+                                        ushort.TryParse(setting_root.Value.Trim(), out flag_resolution_manual_mode);
                                     }
                                     break;
                                 case "resolution_height":
@@ -423,6 +431,49 @@ namespace LR2Helper_GV {
                                 case "screenshot_save_mode":
                                     if (setting_root.Read()) {
                                         int.TryParse(setting_root.Value.Trim(), out screenshot_save_mode);
+                                    }
+                                    break;
+                                case "simple_result":
+                                    var item_list = new SimpleResultItem();
+
+                                    item_list.box_color = System.Drawing.ColorTranslator.FromHtml(setting_root["box_color"]);
+                                    item_list.font_color = System.Drawing.ColorTranslator.FromHtml(setting_root["font_color"]);
+                                    item_list.font_name = setting_root["font_name"];
+                                    if (!byte.TryParse(setting_root["box_alpha"], out item_list.box_alpha)) {
+                                        item_list.box_alpha = 200;
+                                    }
+                                    if (!byte.TryParse(setting_root["font_alpha"], out item_list.font_alpha)) {
+                                        item_list.font_alpha = 200;
+                                    }
+
+                                    if (setting_root.Read()) {
+                                        var item = setting_root.Value.Trim();
+                                        simple_result_items[item] = item_list;
+
+                                    }
+                                    break;
+                                case "simple_box_color":
+                                    if (setting_root.Read()) {
+                                        simple_box_color = System.Drawing.ColorTranslator.FromHtml(setting_root.Value.Trim());
+                                    }
+                                    break;
+                                case "simple_box_alpha":
+                                    if (setting_root.Read()) {
+                                        if (!byte.TryParse(setting_root.Value.Trim(), out simple_box_alpha)) {
+                                            simple_box_alpha = 200;
+                                        }
+                                    }
+                                    break;
+                                case "simple_font_color":
+                                    if (setting_root.Read()) {
+                                        simple_font_color = System.Drawing.ColorTranslator.FromHtml(setting_root.Value.Trim());
+                                    }
+                                    break;
+                                case "simple_font_alpha":
+                                    if (setting_root.Read()) {
+                                        if (!byte.TryParse(setting_root.Value.Trim(), out simple_font_alpha)) {
+                                            simple_font_alpha = 200;
+                                        }
                                     }
                                     break;
                             }
@@ -523,10 +574,20 @@ namespace LR2Helper_GV {
                     setting_make.WriteElementString("tweet_upload_mode", "0");
                     setting_make.WriteEndElement();
 
-                    setting_make.WriteStartElement("screenshot_rename");
+                    setting_make.WriteStartElement("screenshot");
                     setting_make.WriteElementString("rename_template", "[#DATE#-LR2Result] #MUSIC_NAME# (#MUSIC_DIFF_LEVEL#) #CLEAR_TYPE#");
                     setting_make.WriteElementString("simple_rename_template", "[#DATE#-LR2Simple] #MUSIC_NAME# (#MUSIC_DIFF_LEVEL#) #CLEAR_TYPE#");
                     setting_make.WriteElementString("screenshot_save_mode", "0");
+
+                    setting_make.WriteStartElement("simple_result");
+                    setting_make.WriteAttributeString("box_color", "#000000");
+                    setting_make.WriteAttributeString("box_alpha", "200");
+                    setting_make.WriteAttributeString("font_color", "#FFFFFF");
+                    setting_make.WriteAttributeString("font_alpha", "200");
+                    setting_make.WriteAttributeString("font_name", "Arial");
+                    setting_make.WriteString("1");
+                    setting_make.WriteEndElement();
+
                     setting_make.WriteEndElement();
 
                     setting_make.WriteEndElement();
@@ -580,29 +641,31 @@ namespace LR2Helper_GV {
         }
 
         public void getLR2value() {
-            LR2value.music_name = sharp.ReadString((IntPtr)sharp.Read<int>((IntPtr)LR2value.baseaddr + 0x21F20, false), Encoding.GetEncoding(932), false);
-            LR2value.music_diff = sharp.ReadString((IntPtr)sharp.Read<int>((IntPtr)LR2value.baseaddr + 0x21F24, false), Encoding.GetEncoding(932), false);
-            LR2value.music_diff_level = sharp.ReadString((IntPtr)sharp.Read<int>((IntPtr)LR2value.baseaddr + 0x21f3c, false), Encoding.GetEncoding(932), false);
-            LR2value.music_diff_hakko = sharp.ReadString((IntPtr)sharp.Read<int>((IntPtr)LR2value.baseaddr + 0x21f44, false), Encoding.GetEncoding(932), false);
-            LR2value.music_genre = sharp.ReadString((IntPtr)sharp.Read<int>((IntPtr)LR2value.baseaddr + 0x21f2c, false), Encoding.GetEncoding(932), false);
-            LR2value.music_artist = sharp.ReadString((IntPtr)sharp.Read<int>((IntPtr)LR2value.baseaddr + 0x21f30, false), Encoding.GetEncoding(932), false);
-            LR2value.music_artist2 = sharp.ReadString((IntPtr)sharp.Read<int>((IntPtr)LR2value.baseaddr + 0x21f34, false), Encoding.GetEncoding(932), false);
-            LR2value.play_clear_type = sharp.Read<int>((IntPtr)LR2value.baseaddr + 0x97b88, false);
-            LR2value.play_gauge_type = sharp.Read<int>((IntPtr)LR2value.baseaddr + 0x8, false);
-            LR2value.play_djlevel = sharp.Read<int>((IntPtr)LR2value.baseaddr + 0x97a48, false) * 9 / 32;
+            try {
+                LR2value.music_name = sharp.ReadString((IntPtr)sharp.Read<int>((IntPtr)LR2value.baseaddr + 0x21F20, false), Encoding.GetEncoding(932), false);
+                LR2value.music_diff = sharp.ReadString((IntPtr)sharp.Read<int>((IntPtr)LR2value.baseaddr + 0x21F24, false), Encoding.GetEncoding(932), false);
+                LR2value.music_diff_level = sharp.ReadString((IntPtr)sharp.Read<int>((IntPtr)LR2value.baseaddr + 0x21f3c, false), Encoding.GetEncoding(932), false);
+                LR2value.music_diff_hakko = sharp.ReadString((IntPtr)sharp.Read<int>((IntPtr)LR2value.baseaddr + 0x21f44, false), Encoding.GetEncoding(932), false);
+                LR2value.music_genre = sharp.ReadString((IntPtr)sharp.Read<int>((IntPtr)LR2value.baseaddr + 0x21f2c, false), Encoding.GetEncoding(932), false);
+                LR2value.music_artist = sharp.ReadString((IntPtr)sharp.Read<int>((IntPtr)LR2value.baseaddr + 0x21f30, false), Encoding.GetEncoding(932), false);
+                LR2value.music_artist2 = sharp.ReadString((IntPtr)sharp.Read<int>((IntPtr)LR2value.baseaddr + 0x21f34, false), Encoding.GetEncoding(932), false);
+                LR2value.play_clear_type = sharp.Read<int>((IntPtr)LR2value.baseaddr + 0x97b88, false);
+                LR2value.play_gauge_type = sharp.Read<int>((IntPtr)LR2value.baseaddr + 0x8, false);
+                LR2value.play_djlevel = sharp.Read<int>((IntPtr)LR2value.baseaddr + 0x97a48, false) * 9 / 32;
 
-            LR2value.play_pgreat = sharp.Read<int>((IntPtr)LR2value.baseaddr + 0x97988, false);
-            LR2value.play_great = sharp.Read<int>((IntPtr)LR2value.baseaddr + 0x97984, false);
-            LR2value.play_good = sharp.Read<int>((IntPtr)LR2value.baseaddr + 0x97980, false);
-            LR2value.play_bad = sharp.Read<int>((IntPtr)LR2value.baseaddr + 0x9797c, false);
-            LR2value.play_poor = sharp.Read<int>((IntPtr)LR2value.baseaddr + 0x97978, false);
-            LR2value.play_combo = sharp.Read<int>((IntPtr)LR2value.baseaddr + 0x97998, false);
-            LR2value.play_maximum_combo = sharp.Read<int>((IntPtr)LR2value.baseaddr + 0x979BC, false);
-            LR2value.play_score = LR2value.play_pgreat * 2 + LR2value.play_great;
+                LR2value.play_pgreat = sharp.Read<int>((IntPtr)LR2value.baseaddr + 0x97988, false);
+                LR2value.play_great = sharp.Read<int>((IntPtr)LR2value.baseaddr + 0x97984, false);
+                LR2value.play_good = sharp.Read<int>((IntPtr)LR2value.baseaddr + 0x97980, false);
+                LR2value.play_bad = sharp.Read<int>((IntPtr)LR2value.baseaddr + 0x9797c, false);
+                LR2value.play_poor = sharp.Read<int>((IntPtr)LR2value.baseaddr + 0x97978, false);
+                LR2value.play_combo = sharp.Read<int>((IntPtr)LR2value.baseaddr + 0x97998, false);
+                LR2value.play_maximum_combo = sharp.Read<int>((IntPtr)LR2value.baseaddr + 0x979BC, false);
+                LR2value.play_score = LR2value.play_pgreat * 2 + LR2value.play_great;
 
-            if (LR2value.play_djlevel > 8) {
-                LR2value.play_djlevel = (LR2value.play_score * 100 / (LR2value.play_maximum_combo * 2)) / 11;
-            }
+                if (LR2value.play_djlevel > 8) {
+                    LR2value.play_djlevel = (LR2value.play_score * 100 / (LR2value.play_maximum_combo * 2)) / 11;
+                }
+            } catch (Exception) { return; }
 
         }
 
@@ -715,19 +778,21 @@ namespace LR2Helper_GV {
             base.WndProc(ref m);
 
             if (m.Msg == 0x0312) {
-                Keys key = (Keys)(((int)m.LParam >> 16) & 0xFFFF);                  // The key of the hotkey that was pressed.
-                KeyModifier modifier = (KeyModifier)((int)m.LParam & 0xFFFF);       // The modifier of the hotkey that was pressed.
-                int id = m.WParam.ToInt32();                                        // The id of the hotkey that was pressed.
-                if (id == 0) {
-                    sendTweet(this.textBoxTweettext.Text);
-                } else if (id == 1) {
-                    getSongstatus(tweet_template_sub);
-                    sendTweet(this.textBoxTweettext.Text);
-                } else if (id == 2) {
-                    SetEventRenameScreenshot();
-                } else if (id == 3) {
-                    SetEventRenameScreenshot();
-                }
+                try {
+                    Keys key = (Keys)(((int)m.LParam >> 16) & 0xFFFF);                  // The key of the hotkey that was pressed.
+                    KeyModifier modifier = (KeyModifier)((int)m.LParam & 0xFFFF);       // The modifier of the hotkey that was pressed.
+                    int id = m.WParam.ToInt32();                                        // The id of the hotkey that was pressed.
+                    if (id == 0) {
+                        sendTweet(this.textBoxTweettext.Text);
+                    } else if (id == 1) {
+                        getSongstatus(tweet_template_sub);
+                        sendTweet(this.textBoxTweettext.Text);
+                    } else if (id == 2) {
+                        SetEventRenameScreenshot();
+                    } else if (id == 3) {
+                        SetEventRenameScreenshot();
+                    }
+                } catch (Exception) { return; }
             }
         }
 
@@ -810,7 +875,8 @@ namespace LR2Helper_GV {
             "B",
             "A",
             "AA",
-            "AAA"
+            "AAA",
+            "MAX"
         };
         public int play_count;
 

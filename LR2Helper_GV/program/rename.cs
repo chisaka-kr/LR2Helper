@@ -139,11 +139,11 @@ namespace LR2Helper_GV {
                         System.IO.Directory.Move(@before_image, screenshot_path + "\\" + text + ".png");
                         break;
                     case 2: //심플 스크린샷만
-                        pictureBoxSimpleresult.Image.Save(screenshot_path + "\\" + text_simple + ".png", System.Drawing.Imaging.ImageFormat.Png);
+                        pictureBoxSimpleresult.Image.Save(simple_screenshot_path + "\\" + text_simple + ".png", System.Drawing.Imaging.ImageFormat.Png);
                         break;
                     default: //둘 다
                         System.IO.Directory.Move(@before_image, screenshot_path + "\\" + text + ".png");  //얘는 옮기고
-                        pictureBoxSimpleresult.Image.Save(screenshot_path + "\\" + text_simple + ".png", System.Drawing.Imaging.ImageFormat.Png); //얘는 만들고
+                        pictureBoxSimpleresult.Image.Save(simple_screenshot_path + "\\" + text_simple + ".png", System.Drawing.Imaging.ImageFormat.Png); //얘는 만들고
                         break;
                 }
             } catch (Exception) {
