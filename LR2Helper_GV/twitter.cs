@@ -28,7 +28,7 @@ namespace LR2Helper_GV {
         public string tweet_template = "#MUSIC_NAME# (#MUSIC_DIFF_LEVEL#)を #CLEAR_TYPE#しました!";
         public string tweet_template_sub = "@null #MUSIC_NAME# (#MUSIC_DIFF_LEVEL#)を #CLEAR_TYPE#しました!";
         public int tweet_upload_mode = 0;
-        delegate void SetTextCallback(string text);
+        
 
         // Create a new set of credentials for the application.
 

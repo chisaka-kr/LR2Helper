@@ -28,7 +28,7 @@ namespace LR2Helper_GV {
         public static extern int GetWindowText(IntPtr hWnd, StringBuilder text, int count);
 
         public static mainForm runningForm;
-        public static program.main lr2helper;
+        public static program.LR2helper lr2helper;
 
         internal enum KeyModifier {
             None = 0,
@@ -47,7 +47,7 @@ namespace LR2Helper_GV {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
-            lr2helper = new program.main();
+            lr2helper = new program.LR2helper();
             runningForm = new mainForm();
             runningForm.init();
 

@@ -41,7 +41,8 @@ namespace LR2Helper_GV {
             }
             */
         }
-        public void init() {
+
+        internal void init() {
             Program.lr2helper.GetXML();
 
             //form setting (설정값 등)
@@ -53,9 +54,10 @@ namespace LR2Helper_GV {
             Program.lr2helper.InitRenameScreenshot();
 
         }
-        public IntPtr GetHandle() {
+        internal IntPtr GetHandle() {
             return this.Handle;
         }
+
         public void SetFormTwitterLoggedIn(string buttonText, string TwitterID) {
             buttonGettwittertoken.Enabled = false;
             buttonOpentwittertoken.Enabled = false;
@@ -77,6 +79,7 @@ namespace LR2Helper_GV {
         public void SaveSimpleResultPicture(string path, System.Drawing.Imaging.ImageFormat format) {
             pictureBoxSimpleresult.Image.Save(path, format);
         }
+
         public void SetFormText(string formName, string text) {
 
             var form = this.Controls.Find(formName, true)[0];
@@ -213,7 +216,7 @@ namespace LR2Helper_GV {
                     } else if (id == 3) {
                         Program.lr2helper.SetEventRenameScreenshot();
                     }
-                } catch (Exception e) { return; }
+                } catch (Exception) { return; }
             }
         }
 

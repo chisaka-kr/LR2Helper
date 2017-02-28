@@ -5,7 +5,7 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{F5ADD5C2-B6B8-4FB6-A85D-ECF43F25AADB}</ProjectGuid>
-    <OutputType>Exe</OutputType>
+    <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>LR2Helper_GV</RootNamespace>
     <AssemblyName>LR2Helper</AssemblyName>
@@ -128,7 +128,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="program\main.cs" />
+    <Compile Include="program\LR2Helper.simpleresult.cs" />
+    <Compile Include="program\LR2Helper.greenvalue.cs" />
+    <Compile Include="program\LR2Helper.rename.cs" />
+    <Compile Include="program\LR2Helper.main.cs" />
     <Compile Include="main.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -152,6 +155,7 @@
     </Compile>
     <None Include="LR2Helper.exe.config" />
     <None Include="packages.config" />
+    <Compile Include="program\LR2Helper.twitter.cs" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
