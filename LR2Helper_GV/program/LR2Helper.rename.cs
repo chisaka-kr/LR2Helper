@@ -46,7 +46,7 @@ namespace LR2Helper_GV.program {
         internal void RunRenameScreenshot() {
             if (flag_run_rename == 0) { return; }
             //트윗 내용이랑 똑같은 방법으로 치환해준다
-            GetLR2Value();
+            GetLR2ValueResult();
 
             var level = "";
             if (Convert.ToInt16(LR2value.music_diff_level) > 0) {

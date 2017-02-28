@@ -50,12 +50,16 @@
             this.buttonOpentwittertoken = new System.Windows.Forms.Button();
             this.tabPage3 = new System.Windows.Forms.TabPage();
             this.pictureBoxSimpleresult = new System.Windows.Forms.PictureBox();
+            this.tabPage4 = new System.Windows.Forms.TabPage();
+            this.labelRandomArrange1P = new System.Windows.Forms.Label();
+            this.labelRandomArrange2P = new System.Windows.Forms.Label();
             this.statusStrip1.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.tabPage2.SuspendLayout();
             this.tabPage3.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxSimpleresult)).BeginInit();
+            this.tabPage4.SuspendLayout();
             this.SuspendLayout();
             // 
             // statusStrip1
@@ -80,6 +84,7 @@
             this.tabControl1.Controls.Add(this.tabPage1);
             this.tabControl1.Controls.Add(this.tabPage2);
             this.tabControl1.Controls.Add(this.tabPage3);
+            this.tabControl1.Controls.Add(this.tabPage4);
             this.tabControl1.Location = new System.Drawing.Point(0, 1);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
@@ -264,6 +269,39 @@
             this.pictureBoxSimpleresult.TabIndex = 0;
             this.pictureBoxSimpleresult.TabStop = false;
             // 
+            // tabPage4
+            // 
+            this.tabPage4.Controls.Add(this.labelRandomArrange2P);
+            this.tabPage4.Controls.Add(this.labelRandomArrange1P);
+            this.tabPage4.Location = new System.Drawing.Point(4, 22);
+            this.tabPage4.Name = "tabPage4";
+            this.tabPage4.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage4.Size = new System.Drawing.Size(402, 94);
+            this.tabPage4.TabIndex = 3;
+            this.tabPage4.Text = "Random View";
+            this.tabPage4.UseVisualStyleBackColor = true;
+            // 
+            // labelRandomArrange1P
+            // 
+            this.labelRandomArrange1P.AutoSize = true;
+            this.labelRandomArrange1P.Font = new System.Drawing.Font("ＭＳ ゴシック", 26.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
+            this.labelRandomArrange1P.Location = new System.Drawing.Point(6, 7);
+            this.labelRandomArrange1P.Name = "labelRandomArrange1P";
+            this.labelRandomArrange1P.Size = new System.Drawing.Size(69, 35);
+            this.labelRandomArrange1P.TabIndex = 0;
+            this.labelRandomArrange1P.Text = "1P:";
+            this.labelRandomArrange1P.Click += new System.EventHandler(this.label1_Click);
+            // 
+            // labelRandomArrange2P
+            // 
+            this.labelRandomArrange2P.AutoSize = true;
+            this.labelRandomArrange2P.Font = new System.Drawing.Font("ＭＳ ゴシック", 26.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
+            this.labelRandomArrange2P.Location = new System.Drawing.Point(5, 54);
+            this.labelRandomArrange2P.Name = "labelRandomArrange2P";
+            this.labelRandomArrange2P.Size = new System.Drawing.Size(69, 35);
+            this.labelRandomArrange2P.TabIndex = 1;
+            this.labelRandomArrange2P.Text = "2P:";
+            // 
             // mainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 12F);
@@ -287,6 +325,8 @@
             this.tabPage2.PerformLayout();
             this.tabPage3.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxSimpleresult)).EndInit();
+            this.tabPage4.ResumeLayout(false);
+            this.tabPage4.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -314,6 +354,9 @@
         private System.Windows.Forms.Button buttonOpentwittertoken;
         private System.Windows.Forms.TabPage tabPage3;
         private System.Windows.Forms.PictureBox pictureBoxSimpleresult;
+        private System.Windows.Forms.TabPage tabPage4;
+        private System.Windows.Forms.Label labelRandomArrange1P;
+        private System.Windows.Forms.Label labelRandomArrange2P;
     }
 }
 

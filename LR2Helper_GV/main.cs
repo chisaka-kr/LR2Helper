@@ -220,6 +220,9 @@ namespace LR2Helper_GV {
             }
         }
 
+        private void label1_Click(object sender, EventArgs e) {
+
+        }
     }
 
 }

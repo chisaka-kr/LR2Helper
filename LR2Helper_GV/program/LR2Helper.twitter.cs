@@ -76,7 +76,7 @@ namespace LR2Helper_GV.program {
             if (now_scene == 5) {
                 Program.Delay(500); // 진입 후 500ms만 기다린다 (NO PLAY라고 뜨는 걸 막기위해)
 
-                GetLR2Value();
+                GetLR2ValueResult();
 
                 var level = "";
                 if (Convert.ToInt16(LR2value.music_diff_level) > 0) {
