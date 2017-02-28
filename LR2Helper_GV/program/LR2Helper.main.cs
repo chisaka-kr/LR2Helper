@@ -23,7 +23,7 @@ namespace LR2Helper_GV.program {
     public partial class LR2helper {
 
         internal string prog_version = "L2.0.7";
-        internal string prog_build = "170228:0 alpha";
+        internal string prog_build = "170228:1 release";
 
         internal IntPtr prog_baseaddr; // 보통 0x400000;
         internal IntPtr vmem_getbaseaddr_asm; // base address를 빼올 코드 
@@ -259,14 +259,16 @@ namespace LR2Helper_GV.program {
                         }
                         if ((now_scene == 4) && (now_scene != LR2value.scene)) { //플레이 화면 진입
                             Delay(1000);
+                            //RANDOM 
                             GetLR2ValuePlayStart();
 
                             Program.runningForm.SetFormText("labelRandomArrange1P", "1P: " + LR2value.music_key_arrange_1p);
                             Program.runningForm.SetFormText("labelRandomArrange2P", "2P: " + LR2value.music_key_arrange_2p);
 
-                            var text_pointer = (IntPtr)sharp.Read<int>((IntPtr)LR2value.baseaddr + 0x21EF8 + (4 * 999), false);
-
-                            sharp.WriteString(text_pointer, "KEY POSITION: "+LR2value.music_key_arrange_1p, Encoding.GetEncoding(932), false);
+                        
+                           //각각 DST_TEXT 201번과 202번에 1P와 2P 배치를 넣는다
+                            sharp.WriteString((IntPtr)sharp.Read<int>((IntPtr)LR2value.baseaddr + 0x21EF8 + (4 * 201), false), LR2value.music_key_arrange_1p, Encoding.GetEncoding(932), false);
+                            sharp.WriteString((IntPtr)sharp.Read<int>((IntPtr)LR2value.baseaddr + 0x21EF8 + (4 * 202), false), LR2value.music_key_arrange_2p, Encoding.GetEncoding(932), false);
                         }
 
                         if ((now_scene == 5) && (now_scene != LR2value.scene)) { //리절트 화면 진입
