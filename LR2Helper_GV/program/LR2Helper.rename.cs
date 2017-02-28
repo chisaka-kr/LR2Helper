@@ -30,10 +30,18 @@ namespace LR2Helper_GV.program {
             Program.RegisterHotKey(Program.runningForm.GetHandle(), 3, (int)Program.KeyModifier.Alt, Keys.F9.GetHashCode()); // ALT+F9 핫키 등록
         }
         internal void SetEventRenameScreenshot() {
+            String window_title = GetActiveWindowTitle();
+            if (window_title != sharp.Windows.MainWindow.Title) {
+                Program.runningForm.SetTooltipStrip("Please run on result screen.");
+                return;
+            }
             if (LR2value.scene != 5) { return; }
             if (flag_run_rename != 0) { return; }
 
             if (flag_already_screenshoted == 0) { //스크린샷을 안찍었다면
+                SetLR2StatusText("");
+                Program.Delay(50);
+                
                 Program.KeyboardEvent((byte)Keys.F6, 0x00, 0x00, 0);
                 Program.Delay(200);
                 Program.KeyboardEvent((byte)Keys.F6, 0x00, 0x02, 0);

@@ -22,8 +22,8 @@ using Tweetinvi.Parameters;
 namespace LR2Helper_GV.program {
     public partial class LR2helper {
 
-        internal string prog_version = "L2.0.7";
-        internal string prog_build = "170228:1 release";
+        internal string prog_version = "L2.0.8";
+        internal string prog_build = "170301:0 alpha";
 
         internal IntPtr prog_baseaddr; // 보통 0x400000;
         internal IntPtr vmem_getbaseaddr_asm; // base address를 빼올 코드 
@@ -265,15 +265,17 @@ namespace LR2Helper_GV.program {
                             Program.runningForm.SetFormText("labelRandomArrange1P", "1P: " + LR2value.music_key_arrange_1p);
                             Program.runningForm.SetFormText("labelRandomArrange2P", "2P: " + LR2value.music_key_arrange_2p);
 
-                        
-                           //각각 DST_TEXT 201번과 202번에 1P와 2P 배치를 넣는다
+
+                            
+                            //각각 DST_TEXT 201번과 202번에 1P와 2P 배치를 넣는다
                             sharp.WriteString((IntPtr)sharp.Read<int>((IntPtr)LR2value.baseaddr + 0x21EF8 + (4 * 201), false), LR2value.music_key_arrange_1p, Encoding.GetEncoding(932), false);
                             sharp.WriteString((IntPtr)sharp.Read<int>((IntPtr)LR2value.baseaddr + 0x21EF8 + (4 * 202), false), LR2value.music_key_arrange_2p, Encoding.GetEncoding(932), false);
                         }
-
                         if ((now_scene == 5) && (now_scene != LR2value.scene)) { //리절트 화면 진입
                             flag_already_tweeted = 0; //플래그 초기화
                             flag_already_screenshoted = 0; //플래그 초기화
+
+                            Program.runningForm.SetTooltipStrip("Tweet:F11 / Screenshot: F9");
 
                             GetSongstatus(this.tweet_template);
                         }
@@ -337,7 +339,7 @@ namespace LR2Helper_GV.program {
                 LR2value.music_artist2 = sharp.ReadString((IntPtr)sharp.Read<int>((IntPtr)LR2value.baseaddr + 0x21f34, false), Encoding.GetEncoding(932), false);
                 LR2value.play_clear_type = sharp.Read<int>((IntPtr)LR2value.baseaddr + 0x97b88, false);
                 LR2value.play_gauge_type = sharp.Read<int>((IntPtr)LR2value.baseaddr + 0x8, false);
-                LR2value.play_djlevel = sharp.Read<int>((IntPtr)LR2value.baseaddr + 0x97a48, false) * 9 / 32;
+                //LR2value.play_djlevel = sharp.Read<int>((IntPtr)LR2value.baseaddr + 0x97a48, false) * 9 / 32;
 
                 LR2value.play_pgreat = sharp.Read<int>((IntPtr)LR2value.baseaddr + 0x97988, false);
                 LR2value.play_great = sharp.Read<int>((IntPtr)LR2value.baseaddr + 0x97984, false);
@@ -348,9 +350,9 @@ namespace LR2Helper_GV.program {
                 LR2value.play_maximum_combo = sharp.Read<int>((IntPtr)LR2value.baseaddr + 0x979BC, false);
                 LR2value.play_score = LR2value.play_pgreat * 2 + LR2value.play_great;
 
-                if (LR2value.play_djlevel > 8) {
+                //if (LR2value.play_djlevel > 8) {
                     LR2value.play_djlevel = (LR2value.play_score * 100 / (LR2value.play_maximum_combo * 2)) / 11;
-                }
+               //}
             } catch (Exception) { return; }
 
         }
@@ -695,7 +697,11 @@ namespace LR2Helper_GV.program {
                 return;
             }
         }
-
+        public void SetLR2StatusText(string text) {
+            try {
+                sharp.WriteString((IntPtr)sharp.Read<int>((IntPtr)LR2value.baseaddr + 0x21EF8 + (4 * 200), false), text, Encoding.GetEncoding(932), false);
+            } catch(Exception) { }
+        }
 
         public static DateTime Delay(int MS) {
             DateTime ThisMoment = DateTime.Now;

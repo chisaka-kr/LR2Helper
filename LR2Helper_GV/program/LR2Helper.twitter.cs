@@ -102,16 +102,24 @@ namespace LR2Helper_GV.program {
                 foreach (var replace_key in replace_list.Keys) {
                     tweet_text = tweet_text.Replace(replace_key, replace_list[replace_key]);
                 }
+
+                sharp.WriteString((IntPtr)sharp.Read<int>((IntPtr)LR2value.baseaddr + 0x21EF8 + (4 * 203), false), tweet_text, Encoding.GetEncoding(932), false);
                 Program.runningForm.SetFormText("textBoxTweettext", tweet_text);
+                
 
             }
         }
         internal void SendTweet(string text) {
             String window_title = GetActiveWindowTitle();
-            if (flag_already_tweeted == 1) {
-                Program.runningForm.SetTooltipStrip("Already tweeted");
+            if (window_title != sharp.Windows.MainWindow.Title) {
+                Program.runningForm.SetTooltipStrip("Please run on result screen.");
+                return;
             }
-            if ((authenticatedUser != null) && (LR2value.scene == 5) && (window_title == sharp.Windows.MainWindow.Title)) {
+            if (flag_already_tweeted == 1) {
+                Program.runningForm.SetTooltipStrip("Already tweeted.");
+                return;
+            }
+            if ((authenticatedUser != null) && (LR2value.scene == 5)) {
                 if (text.Length < 140) {
                     var window = sharp.Windows.MainWindow;
 
@@ -124,13 +132,17 @@ namespace LR2Helper_GV.program {
                     IMedia media;
                     IMedia media2;
                     ITweet tweet;
+
+
                     if (flag_already_screenshoted == 0) { //스크린샷을 안찍었다면
                         if (!((tweet_upload_mode == 4) || (tweet_upload_mode == 2))) {
-                            flag_already_screenshoted = 1;
+                            SetLR2StatusText("");
+                            Program.Delay(50);
                             Program.KeyboardEvent((byte)Keys.F6, 0x00, 0x00, 0);
                             Program.Delay(200);
                             Program.KeyboardEvent((byte)Keys.F6, 0x00, 0x02, 0);
                             Program.Delay(1000);
+                            flag_already_screenshoted = 1;
 
                         }
                     }
@@ -138,6 +150,7 @@ namespace LR2Helper_GV.program {
                     var image = File.ReadAllBytes(file);
                     var simpleImage = Program.runningForm.GetSimpleResultPicture();
 
+                    Program.runningForm.SetTooltipStrip("Tweet upload start.");
                     switch (tweet_upload_mode) {
                         case 4:
                             tweet = Tweet.PublishTweet(text);
@@ -171,16 +184,16 @@ namespace LR2Helper_GV.program {
                     }
 
                     if (tweet != null) {
-                        Program.runningForm.SetTooltipStrip("Tweet succeeded");
+                        Program.runningForm.SetTooltipStrip("Tweet succeeded.");
                         flag_already_tweeted = 1;
                     } else {
-                        Program.runningForm.SetTooltipStrip("Tweet failed");
+                        Program.runningForm.SetTooltipStrip("Tweet failed.");
                     }
                 } else {
-                    Program.runningForm.SetTooltipStrip("Tweet is too long");
+                    Program.runningForm.SetTooltipStrip("Tweet is too long..");
                 }
             } else {
-                Program.runningForm.SetTooltipStrip("Please run on result screen or twitter isn't authenticated.");
+                Program.runningForm.SetTooltipStrip("Twitter dosen't authenticated.");
             }
         }
 

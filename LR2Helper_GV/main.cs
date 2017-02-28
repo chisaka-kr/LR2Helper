@@ -104,6 +104,9 @@ namespace LR2Helper_GV {
         public void SetTooltipStrip(string text) {
             try {
                 toolStripStatusLabel1.Text = text;
+                if (Program.lr2helper.LR2value.baseaddr>0) {
+                    Program.lr2helper.SetLR2StatusText(text);
+                }
             } catch (Exception) { return; }
 
         }
