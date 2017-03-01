@@ -95,7 +95,7 @@ namespace LR2Helper_GV {
         }
 
         public string GetFormText(string formName) {
-            var form = this.Controls[formName];
+            var form = this.Controls.Find(formName, true)[0];
 
             if (form == null) { return ""; }
 

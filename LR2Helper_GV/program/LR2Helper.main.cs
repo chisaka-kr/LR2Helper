@@ -23,7 +23,7 @@ namespace LR2Helper_GV.program {
     public partial class LR2helper {
 
         internal string prog_version = "L2.0.8";
-        internal string prog_build = "170301:0 alpha";
+        internal string prog_build = "170301:1 release";
 
         internal IntPtr prog_baseaddr; // 보통 0x400000;
         internal IntPtr vmem_getbaseaddr_asm; // base address를 빼올 코드 
@@ -115,7 +115,7 @@ namespace LR2Helper_GV.program {
                         "cmp eax,2000000",
                         "jg "+(prog_baseaddr+0xe79b),
                         "mov ["+vmem_getbaseaddr_reg+"],eax",
-                        "jmp "+(prog_baseaddr+0xe79b)
+                        "jmp "+(prog_baseaddr+0xe79b)   
                     }; // 삽입할 code
                             string[] str_vmem_getbaseaddr_jmp =
                             {
@@ -223,11 +223,11 @@ namespace LR2Helper_GV.program {
                         int dst_x;
                         int dst_y;
 
-                        if (!int.TryParse(Program.runningForm.GetFormText("textboxDSTX"), out dst_x)) {
+                        if (!int.TryParse(Program.runningForm.GetFormText("textBoxDSTX"), out dst_x)) {
                             dst_x = 288;
                         }
 
-                        if (!int.TryParse(Program.runningForm.GetFormText("textboxDSTY"), out dst_y)) {
+                        if (!int.TryParse(Program.runningForm.GetFormText("textBoxDSTY"), out dst_y)) {
                             dst_y = 482;
                         }
 
