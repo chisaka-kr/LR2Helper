@@ -23,7 +23,7 @@ namespace LR2Helper_GV.program {
     public partial class LR2helper {
 
         internal string prog_version = "L2.0.8";
-        internal string prog_build = "170301:1 release";
+        internal string prog_build = "170303:0 release";
 
         internal IntPtr prog_baseaddr; // 보통 0x400000;
         internal IntPtr vmem_getbaseaddr_asm; // base address를 빼올 코드 
@@ -159,7 +159,7 @@ namespace LR2Helper_GV.program {
                     //뭔지 모를 에러가 났지만 그래도 재시도
                     Program.runningForm.SetTooltipStrip("Attach process failed..");
                     WriteLog(e.ToString());
-                    break;
+                    Thread.Sleep(1000);
                 }
             }
 
@@ -173,8 +173,6 @@ namespace LR2Helper_GV.program {
 
             while (true) {
                 try {
-
-
                     //ini로 설정 저장. 사용하지 않음
                     //WritePrivateProfileString("setting", "DSTY", Program.lr2helper.GetFormText(textboxDSTY).ToString(), setting_path); 
 
@@ -258,8 +256,8 @@ namespace LR2Helper_GV.program {
                             RunRenameScreenshot(); //스크린샷을 옮긴다
                         }
                         if ((now_scene == 4) && (now_scene != LR2value.scene)) { //플레이 화면 진입
-                            Delay(1000);
                             //RANDOM 
+                            Program.Delay(1500);
                             GetLR2ValuePlayStart();
 
                             Program.runningForm.SetFormText("labelRandomArrange1P", "1P: " + LR2value.music_key_arrange_1p);
@@ -302,30 +300,47 @@ namespace LR2Helper_GV.program {
         }
         public void GetLR2ValuePlayStart() {
             try {
-                LR2value.music_keytype = sharp.Read<int>((IntPtr)LR2value.baseaddr + 0x23DC0, false);
-                // RANDOM GET
-                LR2value.music_key_arrange_1p = "";
-                LR2value.music_key_arrange_2p = "";
-                for (var i = 0; i < LR2value.music_key_arrange.Length; i++) {
-                    LR2value.music_key_arrange[i] = sharp.Read<int>((IntPtr)LR2value.baseaddr - 0x234e0 + i * 4, false);
-                    switch (LR2value.music_keytype) {
-                        case 5:
-                        case 7:
-                        case 9:
-                            if ((i > 0) && (i <= LR2value.music_keytype)) {
-                                LR2value.music_key_arrange_1p += LR2value.music_key_arrange[i];
-                            }
-                            break;
-                        case 10:
-                        case 14:
-                            if ((i > 0) && (i <= LR2value.music_keytype / 2)) {
-                                LR2value.music_key_arrange_1p += LR2value.music_key_arrange[i];
-                            } else if ((i > 10) && (i - 10 <= LR2value.music_keytype / 2)) {
-                                LR2value.music_key_arrange_2p += LR2value.music_key_arrange[i] - 10;
-                            }
-                            break;
+                var try_count = 0;
+                var equal_check = 0;
+                do {
+                    try_count++;
+                    LR2value.music_keytype = sharp.Read<int>((IntPtr)LR2value.baseaddr + 0x23DC0, false);
+
+                    if (equal_check == LR2value.music_keytype) {
+                        Program.Delay(1000);
+                        continue;
                     }
-                }
+                   
+                    // RANDOM GET
+                    LR2value.music_key_arrange_1p = "";
+                    LR2value.music_key_arrange_2p = "";
+                    for (var i = 0; i < LR2value.music_key_arrange.Length; i++) {
+                        if (LR2value.music_key_arrange[i] == sharp.Read<int>((IntPtr)LR2value.baseaddr - 0x234e0 + i * 4, false)) {
+                            equal_check++;
+                        }
+                        LR2value.music_key_arrange[i] = sharp.Read<int>((IntPtr)LR2value.baseaddr - 0x234e0 + i * 4, false);
+                        switch (LR2value.music_keytype) {
+                            case 5:
+                            case 7:
+                            case 9:
+                                if ((i > 0) && (i <= LR2value.music_keytype)) {
+                                    LR2value.music_key_arrange_1p += LR2value.music_key_arrange[i];
+                                }
+                                break;
+                            case 10:
+                            case 14:
+                                if ((i > 0) && (i <= LR2value.music_keytype / 2)) {
+                                    LR2value.music_key_arrange_1p += LR2value.music_key_arrange[i];
+                                } else if ((i > 10) && (i - 10 <= LR2value.music_keytype / 2)) {
+                                    LR2value.music_key_arrange_2p += LR2value.music_key_arrange[i] - 10;
+                                }
+                                break;
+                        }
+                    }
+                    if (equal_check != LR2value.music_keytype) {
+                        break;
+                    }
+                } while (try_count < 5);
             } catch (Exception) { return; }
         }
         public void GetLR2ValueResult() {
